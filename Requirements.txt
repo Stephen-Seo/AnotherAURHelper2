@@ -1,0 +1,57 @@
+================================================================================
+    AnotherAURHelper2
+================================================================================
+
+Use systemd-npawn to do all the potentially hazardous work (such as sourcing
+PKGBUILD files to get Bash variables).
+
+--------------------------------------------------------------------------------
+    The Setup
+--------------------------------------------------------------------------------
+
+A container located in /var/lib/machines/ that is also a btrfs subvolume should
+be created as the template to be used every time a package needs to be
+sourced/built.
+
+systemd-nspawn has the capability of spawning a container as a clone of an
+existing container that is removed when "powered-off".
+
+--------------------------------------------------------------------------------
+    Usage
+--------------------------------------------------------------------------------
+
+The build process is as follows:
+
+    1. Parse a list of packages to build and other options
+    2. Per package:
+        1. Fetch the latest PKGBUILD
+        2. Prompt the user to check the PKGBUILD and confirm it is "ok"
+        3. Check the version
+        4. Check the hashes
+        5. Check the install file (if any)
+        6. Prompt the user what to do (build if version is updated)
+    3. After all packages have been checked, for each package to build:
+        1. Set up the environment in the container to build
+        2. Build
+        3. Assert that the build succeeded
+        4. Sign the package
+        5. Add package to repo
+        6. Move package files to proper locations
+
+Most of 2.1-2.6 should be done in the container just in case a malicious
+PKGBUILD is encountered.
+
+Every usage of the container should be automatic to the end-user of
+AnotherAURHelper2 (other than entering the sudo password once at the start).
+
+--------------------------------------------------------------------------------
+    Other Notes
+--------------------------------------------------------------------------------
+
+Allow building in tmpfs (the container should have its own mounted /tmp that can
+be used).
+
+For file transfer, openssh could be used as an alternative to bind-mounts.
+
+Cache PKGBUILDs. They are either fetched from aur.archlinux.org, or the
+experimental mirror on github.com .
