@@ -156,8 +156,6 @@ only_check_SRCINFO = true
 
 [[entry]]
 name = "ncmpcpp"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "ncmpcpp"
 skip_branch_up_to_date = true
 repo_path = "https://gitlab.archlinux.org/archlinux/packaging/packages/ncmpcpp.git"
 

@@ -2,6 +2,9 @@
 
 import argparse
 import datetime
+import getpass
+import subprocess
+import sys
 import tomllib
 
 STRFTIME_LOCAL_FORMAT = "%Y-%m-%dT%H:%M:%S%:z"
@@ -74,7 +77,32 @@ def main():
         log_print("ERROR: Failed to parse toml config file!")
         parser.print_usage()
         return
-    log_print("test", toml=toml_d)
+    shared_state = dict()
+    shared_state["toml"] = toml_d
+    shared_state["pass"] = getpass.getpass(prompt="sudo password: ")
+    try:
+        subprocess.run(("/usr/bin/sudo", "-k"), check=True)
+        subprocess.run(
+            ("/usr/bin/sudo", "-v", "--stdin"),
+            input=shared_state["pass"].encode(),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+    except:
+        log_print("ERROR: Failed to auth with sudo!", toml=toml_d)
+        log_print(repr(sys.exception()), toml=toml_d)
+        return
+
+    try:
+        subprocess.run(
+            ("/usr/bin/sudo", "echo", "test echo with sudo"), check=True
+        )
+        subprocess.run(("/usr/bin/sudo", "-k"), check=True)
+    except:
+        log_print("ERROR: Failed to check sudo auth!", toml=toml_d)
+        log_print(repr(sys.exception()), toml=toml_d)
+        return
 
 
 if __name__ == "__main__":
