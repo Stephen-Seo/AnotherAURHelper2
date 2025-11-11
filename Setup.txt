@@ -74,7 +74,8 @@ Ephemeral=on
 This config will cause all future starts of the container to be a clone of the
 original container and when the container is stopped, the clone is erased. In
 other words, the container becomes immutable and every time it is started with
-this config option set, a temporary copy is used instead.
+this config option set, a temporary copy is used instead. If the container is
+inside of a btrfs subvolume, creation of the copy should be fast.
 
 Note that if you want to update the container, you must set "Ephemeral" to "off"
 and start the container afterwards for changes to persist. Don't forget to set
