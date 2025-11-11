@@ -7,3 +7,664 @@ editor = "/usr/bin/vim"
 tz_force_offset_hours = 9
 tz_force_offset_minutes = 0
 log_file = "/home/stephen/Documents/aurbuild/log.log"
+
+
+[[entry]]
+name = "aurutils"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "aurutils"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "bindfs"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "bindfs"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "chrome-gnome-shell"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "chrome-gnome-shell"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "curseforge"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "curseforge"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "f3"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "f3"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "festival-freebsoft-utils"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "festival-freebsoft-utils"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "g810-led"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "g810-led"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "gdk-pixbuf2-noglycin"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "gdk-pixbuf2-noglycin"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "gnome-icon-theme-symbolic"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "gnome-icon-theme-symbolic"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "gnome-icon-theme"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "gnome-icon-theme"
+aur_deps = [
+    "gnome-icon-theme-symbolic"
+]
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "gromit-mpx"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "gromit-mpx"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "helm-synth"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "helm-synth"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "icecat"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "icecat"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "librewolf"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "librewolf"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "lib32-jemalloc"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "lib32-jemalloc"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "librsvg-noglycin"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "librsvg-noglycin"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+aur_deps = [
+    "gdk-pixbuf2-noglycin"
+]
+
+[[entry]]
+name = "libtai"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "libtai"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "libtree"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "libtree"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "losslesscut-bin"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "losslesscut-bin"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "multitail"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "multitail"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "ncmpcpp"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "ncmpcpp"
+skip_branch_up_to_date = true
+repo_path = "https://gitlab.archlinux.org/archlinux/packaging/packages/ncmpcpp.git"
+
+[[entry]]
+name = "nouveau-fw"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "nouveau-fw"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "ncurses5-compat-libs"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "ncurses5-compat-libs"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "opencl-amd"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "opencl-amd"
+aur_deps = [
+    "ncurses5-compat-libs"
+]
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "epson-inkjet-printer-escpr"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "epson-inkjet-printer-escpr"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "epson-inkjet-printer-escpr2"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "epson-inkjet-printer-escpr2"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "google-chrome"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "google-chrome"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "libva-vdpau-driver-chromium"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "libva-vdpau-driver-chromium"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mate-screensaver-hacks"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mate-screensaver-hacks"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mcrcon"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mcrcon"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "minecraft-launcher"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "minecraft-launcher"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-environment"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-environment"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-glm"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-glm"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-lua"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-lua"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-pkg-config"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-pkg-config"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-cmake"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-cmake"
+aur_deps = [
+    "mingw-w64-pkg-config",
+    "mingw-w64-environment"
+]
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-configure"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-configure"
+aur_deps = [
+    "mingw-w64-pkg-config",
+    "mingw-w64-environment"
+]
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-zlib"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-zlib"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-libpng"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-libpng"
+aur_deps = [
+    "mingw-w64-pkg-config",
+    "mingw-w64-environment",
+    "mingw-w64-configure",
+    "mingw-w64-zlib"
+]
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-make"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-make"
+aur_deps = [
+    "mingw-w64-environment"
+]
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-libsodium"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-libsodium"
+aur_deps = [
+    "mingw-w64-environment",
+    "mingw-w64-configure",
+    "mingw-w64-pkg-config"
+]
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-glfw"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-glfw"
+aur_deps = [
+    "mingw-w64-pkg-config",
+    "mingw-w64-environment",
+    "mingw-w64-cmake"
+]
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-raylib"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-raylib"
+aur_deps = [
+    "mingw-w64-pkg-config",
+    "mingw-w64-environment",
+    "mingw-w64-cmake",
+    "mingw-w64-glfw"
+]
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "python-mingw-ldd"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "python-mingw-ldd"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "mingw-w64-ldd"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "mingw-w64-ldd"
+aur_deps = [
+    "python-mingw-ldd"
+]
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "modrinth-app"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "modrinth-app"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+full_link_cargo_registry = true
+
+[[entry]]
+name = "modrinth-app-bin"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "modrinth-app-bin"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "moonscript"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "moonscript"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "nginx_passwd"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "nginx_passwd"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "pikaur"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "pikaur"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "plzip"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "plzip"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "tarlz"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "tarlz"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "qjoypad"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "qjoypad"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "rsgain"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "rsgain"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "samsung-unified-driver"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "samsung-unified-driver"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "simplearchiver"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "simplearchiver"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "simplescreenrecorder"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "simplescreenrecorder"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "stdman"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "stdman"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "sunvox"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "sunvox"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "texlive-tikz-uml"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "texlive-tikz-uml"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "ttf-clear-sans"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "ttf-clear-sans"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "umlet"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "umlet"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+
+[[entry]]
+name = "wlrobs"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "wlrobs"
+skip_branch_up_to_date = true
+only_check_SRCINFO = true
+aur_deps = [
+    "obs-studio-git",
+    "wlroots-git"
+]
+other_deps = [
+    "mesa",
+    "pipewire-jack",
+    "wireplumber"
+]
+
+[[entry]]
+name = "nginx-mainline-mod-fancyindex"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "nginx-mainline-mod-fancyindex"
+skip_branch_up_to_date = false
+
+[[entry]]
+name = "ungoogled-chromium-archlinux"
+repo_path = "https://github.com/ungoogled-software/ungoogled-chromium-archlinux.git"
+pkg_name = "ungoogled-chromium"
+ccache_dir = "/home/aur2/ccache_dirs/ungoogled_chromium"
+
+[[entry]]
+name = "cpufetch-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "cpufetch-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "flamegraph-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "flamegraph-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "glfw-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "glfw-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "gnvim-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "gnvim-git"
+full_link_cargo_registry = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "helix-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "helix-git"
+full_link_cargo_registry = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "ion-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "ion-git"
+full_link_cargo_registry = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "neovide-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "neovide-git"
+full_link_cargo_registry = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "obs-studio-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "obs-studio-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+other_deps = [
+    "pipewire-jack",
+    "wireplumber"
+]
+
+[[entry]]
+name = "pasystray-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "pasystray-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+aur_deps = [
+    "gnome-icon-theme",
+    "gnome-icon-theme-symbolic"
+]
+
+[[entry]]
+name = "xorg-xwayland-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "xorg-xwayland-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "wlroots-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "wlroots-git"
+aur_deps = [
+    "xorg-xwayland-git"
+]
+other_deps = [
+    "libdisplay-info"
+]
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "swaybg-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "swaybg-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "sway-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "sway-git"
+aur_deps = [
+    "xorg-xwayland-git",
+    "wlroots-git",
+    "swaybg-git"
+]
+other_deps = [
+    "mesa",
+    "libdisplay-info"
+]
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "swaylock-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "swaylock-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "swayidle-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "swayidle-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "t-rec-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "t-rec-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+full_link_cargo_registry = true
+
+[[entry]]
+name = "tenacity-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "tenacity-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
+[[entry]]
+name = "wlhangul-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "wlhangul-git"
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
+
