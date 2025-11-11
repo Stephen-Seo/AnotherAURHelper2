@@ -111,7 +111,6 @@ def user_interact_alpha(
         except KeyboardInterrupt:
             return "interrupt"
         except:
-            log_print(repr(sys.exception()))
             continue
 
 
