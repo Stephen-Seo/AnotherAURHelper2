@@ -1,0 +1,81 @@
+================================================================================
+    Setup
+================================================================================
+
+This document has notes on how to set up the environment for AnotherAURHelper2.
+
+Requires an installation of ArchLinux using btrfs as the main filesystem
+(without btrfs, using "temporary clones" of the chroot will be more expensive).
+May also require a sane cache for packages if you are using multiple x86_64 Arch
+installations.
+
+Note that the container will be referred to as "the chroot", but will be mostly
+handled by systemd-nspawn and machinectl.
+
+--------------------------------------------------------------------------------
+    Notes about this Guide
+--------------------------------------------------------------------------------
+
+Lines starting with ">" are commands to run on the host.
+Lines starting with "$" are commands to run in the chroot.
+
+--------------------------------------------------------------------------------
+    Dependencies
+--------------------------------------------------------------------------------
+
+The package arch-install-scripts is requried to create the chroot.
+
+--------------------------------------------------------------------------------
+    The Container
+--------------------------------------------------------------------------------
+
+Go to /var/lib/machines and create a btrfs subvolume (or a regular directory for
+those not using btrfs) with the name "aurbuild" (or another name, but you must
+remember that you changed the name as this guide will use the name "aurbuild"
+repeatedly).
+
+> btrfs subvolume create /var/lib/machines/aurbuild
+> pacstrap /var/lib/machines/aurbuild base base-devel vim openssh git cmake ninja meson nftables
+
+You may replace "vim" with another terminal-based editor of choice (like nano).
+
+From now on, start the container with `machinectl start aurbuild` and stop it
+with `machinectl poweroff aurbuild`. You may get a root shell immediately if
+needed with `machinectl shell root@aurbuild`. It is highly recommended to set a
+password for the root user and to harden the system (strict sudo/su/policykit,
+etc).
+
+Set up some stuff that usually occurs when installing an Arch system from
+scratch (locale.gen, hostname, etc).
+
+Create a 'aur' user in the container with `useradd -m -s /bin/bash aur`, and set
+the password for this user.
+
+Also ensure 'aur' is "wheel" and that the sudoers file allows users in "wheel".
+
+$ gpasswd -a aur wheel
+$ EDITOR=vim visudo
+
+You must set up networking by either host networking mode or forwarding as
+mentioned here: https://wiki.archlinux.org/title/Systemd-nspawn#Networking
+You must also set up sshd and access to the container by the user. By the end of
+setting up the network and sshd, you should be able to ssh into the 'aur' user
+and be able to use sudo.
+
+Test that you actually have access to the network by installing a package or
+using curl.
+
+Stop the container before the next step:
+Add the following text snippet to /etc/systemd/nspawn/aurbuild.nspawn :
+
+[Exec]
+Ephemeral=on
+
+This config will cause all future starts of the container to be a clone of the
+original container and when the container is stopped, the clone is erased. In
+other words, the container becomes immutable and every time it is started with
+this config option set, a temporary copy is used instead.
+
+Note that if you want to update the container, you must set "Ephemeral" to "off"
+and start the container afterwards for changes to persist. Don't forget to set
+it back to "on" after you've powered off the container with your changes.
