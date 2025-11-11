@@ -35,7 +35,7 @@ remember that you changed the name as this guide will use the name "aurbuild"
 repeatedly).
 
 > btrfs subvolume create /var/lib/machines/aurbuild
-> pacstrap /var/lib/machines/aurbuild base base-devel vim openssh git cmake ninja meson nftables
+> pacstrap /var/lib/machines/aurbuild base base-devel vim openssh git cmake ninja meson nftables rsync
 
 You may replace "vim" with another terminal-based editor of choice (like nano).
 
