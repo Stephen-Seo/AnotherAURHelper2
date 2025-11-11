@@ -57,6 +57,20 @@ def log_print(*args, **kwargs):
         print(*args, **kwargs)
 
 
+def user_interact(prompt: str, opts: list[str], shared_state: dict) -> str:
+    """Returns the name of the chosen option."""
+    while True:
+        for idx in range(len(opts)):
+            log_print(f"{idx + 1}: {opts[idx]}", toml=shared_state["toml"])
+        user_input = input(f"{prompt} Pick the number > ")
+        try:
+            user_input = int(user_input) - 1
+        except:
+            continue
+        if user_input >= 0 and user_input < len(opts):
+            return opts[user_input]
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="AnotherAURHelper2",
@@ -79,6 +93,16 @@ def main():
         return
     shared_state = dict()
     shared_state["toml"] = toml_d
+
+    log_print(
+        "AnotherAURHelper2 will prompt for your password for sudo auth on this host machine.",
+        toml=toml_d,
+    )
+    user_result = user_interact("Continue?", ["yes", "no"], shared_state)
+
+    if user_result == "no":
+        return
+
     shared_state["pass"] = getpass.getpass(prompt="sudo password: ")
     try:
         subprocess.run(("/usr/bin/sudo", "-k"), check=True)
