@@ -1,0 +1,9 @@
+container_name = "aurbuild"
+pkgs_out_dir = "/home/stephen/Documents/aurbuild/pkgs"
+signing_gpg_dir = "/home/stephen/Documents/aurbuild/signing_gpg"
+checking_gpg_dir = "/home/stephen/Documents/aurbuild/checking_gpg"
+signing_gpg_fingerprint = "8851E8DE2AEC7C53557C455FC3F114E304D4F572"
+editor = "/usr/bin/vim"
+tz_force_offset_hours = 9
+tz_force_offset_minutes = 0
+log_file = "/home/stephen/Documents/aurbuild/log.log"
