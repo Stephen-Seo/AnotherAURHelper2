@@ -12,16 +12,6 @@ GLOBAL_TOML_D = None
 GLOBAL_SHARED_STATE = None
 
 
-def timedelta_to_offset_string(timed: datetime.timedelta) -> str:
-    """Returns a timedelta string in the format "+HH:MM" or "-HH:MM"."""
-
-    seconds = timed.days * 24 * 60 * 60 + timed.seconds
-    minutes_offset = int(seconds / 60)
-    hours_offset = int(minutes_offset / 60)
-    minutes_offset = abs(minutes_offset - hours_offset * 60)
-    return f"{hours_offset:+03d}:{minutes_offset:02d}"
-
-
 def log_print(*args, **kwargs):
     """Prints to stdout and logs the same to a log file."""
     global GLOBAL_TOML_D
