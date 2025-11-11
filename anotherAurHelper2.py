@@ -55,12 +55,16 @@ def log_print(*args, **kwargs):
         lt = datetime.datetime.now().astimezone()
         time_str = lt.strftime(STRFTIME_LOCAL_FORMAT)
         log_file = "anotherAurHelper2.log"
-    print(time_str, end=" ")
-    with open(log_file, "a", encoding="utf-8") as lf:
-        print(time_str, end=" ", file=lf)
+
+    if "no_time" not in kwargs or not kwargs["no_time"]:
+        print(time_str, end=" ")
+        with open(log_file, "a", encoding="utf-8") as lf:
+            print(time_str, end=" ", file=lf)
 
     if "toml" in kwargs:
         del kwargs["toml"]
+    if "no_time" in kwargs:
+        del kwargs["no_time"]
 
     print(*args, **kwargs)
     with open(log_file, "a", encoding="utf-8") as lf:
@@ -80,6 +84,35 @@ def user_interact(prompt: str, opts: list[str], shared_state: dict) -> str:
             continue
         if user_input >= 0 and user_input < len(opts):
             return opts[user_input]
+
+
+def user_interact_alpha(
+    prompt: str, opts: list[str], is_first_default: bool, shared_state: dict
+) -> str:
+    """Returns the name of the chosen option. Returns "interrupt" if Ctrl-C."""
+    while True:
+        for idx in range(len(opts)):
+            log_print(
+                f"{opts[idx][0]}: {opts[idx]}",
+                toml=shared_state["toml"],
+                end=" ",
+            )
+            if is_first_default and idx == 0:
+                log_print("(default)", no_time=True, toml=shared_state["toml"])
+            else:
+                log_print("", no_time=True, toml=shared_state["toml"])
+        try:
+            user_input = input(f"{prompt} Pick the letter > ")
+            if len(user_input) == 0:
+                return opts[0]
+            for idx in range(len(opts)):
+                if opts[idx][0] == user_input[0]:
+                    return opts[idx]
+        except KeyboardInterrupt:
+            return "interrupt"
+        except:
+            log_print(repr(sys.exception()))
+            continue
 
 
 def main():
@@ -113,9 +146,12 @@ def main():
         "AnotherAURHelper2 will prompt for your password for sudo auth on this host machine.",
         toml=toml_d,
     )
-    user_result = user_interact("Continue?", ["yes", "no"], shared_state)
+    # user_result = user_interact("Continue?", ["yes", "no"], shared_state)
+    user_result = user_interact_alpha(
+        "Continue?", ["continue", "quit"], True, shared_state
+    )
 
-    if user_result == "no":
+    if user_result != "continue":
         return
 
     shared_state["pass"] = getpass.getpass(prompt="sudo password: ")
