@@ -3,10 +3,14 @@
 import argparse
 import datetime
 import getpass
+import pathlib
 import subprocess
 import sys
+import time
 import tomllib
 
+AUR_GIT_REPO_PATH = "https://aur.archlinux.org"
+AUR_GIT_REPO_PATH_TEMPLATE = AUR_GIT_REPO_PATH + "/{}.git"
 STRFTIME_LOCAL_FORMAT = "%Y-%m-%dT%H:%M:%S%:z"
 GLOBAL_TOML_D = None
 GLOBAL_SHARED_STATE = None
@@ -103,15 +107,201 @@ def user_interact_alpha(
                 log_print("", no_time=True, toml=shared_state["toml"])
         try:
             user_input = input(f"{prompt} Pick the letter > ")
-            if len(user_input) == 0:
+            if len(user_input) == 0 and is_first_default:
                 return opts[0]
             for idx in range(len(opts)):
-                if opts[idx][0] == user_input[0]:
+                if opts[idx][0].casefold() == user_input[0].casefold():
                     return opts[idx]
         except KeyboardInterrupt:
             return "interrupt"
         except:
             continue
+
+
+def check_clone_package(entry: dict, shared_state: dict) -> int:
+    """Returns 0 if an error ocurred, 1 if the repo was cloned, and 2 if the repo already existed."""
+    name = entry["name"]
+    clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
+    if not clones_dir.is_dir():
+        log_print(
+            'ERROR: "{}" is not a directory!'.format(
+                shared_state["toml"]["clones_dir"]
+            )
+        )
+        return 0
+    clone_dir = clones_dir / name
+    if not clone_dir.is_dir():
+        if clone_dir.is_file():
+            log_print(
+                'ERROR: "{}" is a file!'.format(
+                    shared_state["toml"]["clone_dir"]
+                )
+            )
+            return 0
+        if "repo_path" in entry:
+            if "repo_branch" in entry:
+                try:
+                    run_result = subprocess.run(
+                        (
+                            "/usr/bin/git",
+                            "clone",
+                            "--single-branch",
+                            "-b",
+                            entry["repo_branch"],
+                            entry["repo_path"],
+                            name,
+                        ),
+                        check=True,
+                        cwd=clones_dir,
+                    )
+                except:
+                    log_print(
+                        f'ERROR: Failed to clone "{name}" at path "{entry['repo_path']}"!'
+                    )
+                    log_print(repr(sys.exception()))
+                    return 0
+            else:
+                try:
+                    run_result = subprocess.run(
+                        ("/usr/bin/git", "clone", entry["repo_path"], name),
+                        check=True,
+                        cwd=clones_dir,
+                    )
+                except:
+                    log_print(
+                        f'ERROR: Failed to clone "{name}" at path "{entry['repo_path']}"!'
+                    )
+                    log_print(repr(sys.exception()))
+                    return 0
+        else:
+            clone_url = AUR_GIT_REPO_PATH_TEMPLATE.format(name)
+            try:
+                run_result = subprocess.run(
+                    ("/usr/bin/git", "clone", clone_url, name),
+                    check=True,
+                    cwd=clones_dir,
+                )
+            except:
+                log_print(f'ERROR: Failed to clone "{name}"!')
+                log_print(repr(sys.exception()))
+                return 0
+        return 1
+    else:
+        try:
+            run_result = subprocess.run(
+                ("/usr/bin/git", "restore", "."),
+                check=True,
+                cwd=clone_dir,
+            )
+            run_result = subprocess.run(
+                ("/usr/bin/git", "pull"),
+                check=True,
+                cwd=clone_dir,
+            )
+        except:
+            log_print(f'ERROR: Failed to update "{name}"!')
+            log_print(repr(sys.exception()))
+            return 0
+        return 2
+
+
+def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
+    """Returns 0 on success, 1 on error, 2 if user does not accept PKGBUILD, 3 on interrupt."""
+    name = entry["name"]
+    clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
+    clone_dir = clones_dir / name
+    try:
+        subprocess.run(
+            ("/usr/bin/env", shared_state["toml"]["editor"], "PKGBUILD"),
+            check=True,
+            cwd=clone_dir,
+        )
+    except:
+        log_print(f"""ERROR: Failed to check "{name}"'s PKGBUILD!""")
+        return 1
+    check = user_interact_alpha(
+        "Is PKGBUILD OK?", ["OK", "Not OK"], True, shared_state
+    )
+    if check == "interrupt":
+        return 3
+    elif check != "OK":
+        return 2
+    return 0
+
+
+def run_prepare_only(entry: dict, shared_state: dict) -> int:
+    """Returns 0 on success, 1 on error."""
+    name = entry["name"]
+    clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
+    clone_dir = clones_dir / name
+    try:
+        container = shared_state["toml"]["container_name"]
+        subprocess.run(
+            ("/usr/bin/sudo", "--stdin", "machinectl", "poweroff", container),
+            check=False,
+            input=shared_state["pass"].encode(),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        time.sleep(0.5)
+        subprocess.run(
+            ("/usr/bin/sudo", "machinectl", "start", container), check=True
+        )
+        time.sleep(1)
+        user = shared_state["toml"]["container_user"]
+        c_addr = shared_state["toml"]["container_addr"]
+        if "container_identity_file" in shared_state["toml"]:
+            id_file = shared_state["toml"]["container_identity_file"]
+            subprocess.run(
+                ("/usr/bin/ssh-add", id_file),
+                check=True,
+            )
+            run_ret = subprocess.run(
+                (
+                    "/usr/bin/rsync",
+                    "-e",
+                    f"ssh -i {id_file}",
+                    "-riv",
+                    f"--exclude=.git*",
+                    f"{clone_dir}/",
+                    f"{user}@{c_addr}:{name}/",
+                ),
+                check=True,
+                text=True,
+            )
+        else:
+            run_ret = subprocess.run(
+                (
+                    "/usr/bin/rsync",
+                    "-riv",
+                    f"--exclude=.git*",
+                    f"{clone_dir}/",
+                    f"{user}@{c_addr}:{name}/",
+                ),
+                check=True,
+                text=True,
+            )
+        time.sleep(0.5)
+        run_ret = subprocess.run(
+            (
+                "/usr/bin/sudo",
+                "machinectl",
+                "shell",
+                f"{user}@{container}",
+                "/usr/bin/sh",
+                "-c",
+                f"cd {name} && makepkg -c -s --nobuild",
+            ),
+            check=True,
+        )
+        subprocess.run(
+            ("/usr/bin/sudo", "machinectl", "poweroff", container), check=True
+        )
+    except:
+        log_print(f"""ERROR: Failed to run "prepare" on "{name}"'s PKGBUILD!""")
+        log_print(repr(sys.exception()))
+        return 1
+    return 0
 
 
 def main():
@@ -177,6 +367,62 @@ def main():
         log_print("ERROR: Failed to check sudo auth!", toml=toml_d)
         log_print(repr(sys.exception()), toml=toml_d)
         return
+
+    log_print("Begin checking each package...")
+    shared_state["skipped"] = set()
+    shared_state["confirmed"] = set()
+    idx = 0
+    while idx < len(toml_d["entry"]):
+        entry = toml_d["entry"][idx]
+        if check_clone_package(entry, shared_state) == 0:
+            log_print(
+                f"""Skipping "{entry['name']}" due to clone/update issue..."""
+            )
+            shared_state["skipped"].add(entry["name"])
+            idx += 1
+            continue
+        check_ret = check_PKGBUILD(entry, shared_state)
+        if check_ret == 3:
+            return
+        elif check_ret != 0:
+            log_print(f"""Skipping "{entry['name']}" due to PKGBUILD...""")
+            shared_state["skipped"].add(entry["name"])
+            idx += 1
+            continue
+        if run_prepare_only(entry, shared_state) == 1:
+            log_print(
+                f"""Skipping "{entry['name']}" due to failure to "prepare"..."""
+            )
+            shared_state["skipped"].add(entry["name"])
+            idx += 1
+            continue
+        user_result = user_interact_alpha(
+            "OK with pkg?", ["OK", "Not OK"], True, shared_state
+        )
+        if user_result == "interrupt":
+            return
+        elif user_result != "OK":
+            log_print(
+                f"""Skipping "{entry['name']}" due to user not OK with pkg..."""
+            )
+            shared_state["skipped"].add(entry["name"])
+            idx += 1
+            continue
+        shared_state["confirmed"].add(entry["name"])
+        idx += 1
+
+    # Two passes through all packages.
+    # Don't care about efficiency because its not that important in this case.
+    log_print("List of skipped:")
+    for idx in range(len(toml_d["entry"])):
+        entry = toml_d["entry"][idx]
+        if entry["name"] in shared_state["skipped"]:
+            log_print(f'Entry {entry["name"]} Skipped, will not be built')
+    log_print("List of not skipped:")
+    for idx in range(len(toml_d["entry"])):
+        entry = toml_d["entry"][idx]
+        if entry["name"] in shared_state["confirmed"]:
+            log_print(f'Entry {entry["name"]} Will be built (if out of date)')
 
 
 if __name__ == "__main__":
