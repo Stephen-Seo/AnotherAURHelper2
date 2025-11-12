@@ -3,11 +3,13 @@
 import argparse
 import datetime
 import getpass
+import os
 import pathlib
 import re
 import subprocess
 import sys
 import tarfile
+import threading
 import time
 import tomllib
 import typing
@@ -20,6 +22,7 @@ GLOBAL_SHARED_STATE = None
 KNOWN_ARCHITECTURES = ("x86_64", "aarch64", "any")
 EPOCH_RE = re.compile("^([0-9]+):(.+)$")
 IS_DIGIT_REGEX = re.compile("^[0-9]+$")
+IS_PKG_REGEX = re.compile(r"^.*\.pkg\.tar\.([a-z]+)$")
 
 
 class ArchPkgVersion:
@@ -206,28 +209,9 @@ class ArchPkgVersion:
         return self_str
 
 
-def log_print(*args, **kwargs):
-    """Prints to stdout and logs the same to a log file."""
-    global GLOBAL_TOML_D
-    if "toml" in kwargs:
-        if "tz_force_offset_hours" in kwargs["toml"]:
-            offset_hours = kwargs["toml"]["tz_force_offset_hours"]
-            offset_minutes = 0
-            if "tz_force_offset_minutes" in kwargs["toml"]:
-                offset_minutes = kwargs["toml"]["tz_force_offset_minutes"]
-            tz = datetime.timezone(
-                datetime.timedelta(hours=offset_hours, minutes=offset_minutes)
-            )
-            lt = datetime.datetime.now(tz)
-            time_str = lt.strftime(STRFTIME_LOCAL_FORMAT)
-        else:
-            lt = datetime.datetime.now().astimezone()
-            time_str = lt.strftime(STRFTIME_LOCAL_FORMAT)
-        if "log_file" in kwargs["toml"]:
-            log_file = kwargs["toml"]["log_file"]
-        else:
-            log_file = "anotherAurHelper2.log"
-    elif GLOBAL_TOML_D is not None:
+def get_datetime_now() -> str:
+    """Returns formatted string now."""
+    if GLOBAL_TOML_D is not None:
         if "tz_force_offset_hours" in GLOBAL_TOML_D:
             offset_hours = GLOBAL_TOML_D["tz_force_offset_hours"]
             offset_minutes = 0
@@ -241,6 +225,22 @@ def log_print(*args, **kwargs):
         else:
             lt = datetime.datetime.now().astimezone()
             time_str = lt.strftime(STRFTIME_LOCAL_FORMAT)
+    else:
+        lt = datetime.datetime.now().astimezone()
+        time_str = lt.strftime(STRFTIME_LOCAL_FORMAT)
+    return time_str
+
+
+def log_print(*args, **kwargs):
+    """Prints to stdout and logs the same to a log file."""
+    global GLOBAL_TOML_D
+    time_str = get_datetime_now()
+    if "toml" in kwargs:
+        if "log_file" in kwargs["toml"]:
+            log_file = kwargs["toml"]["log_file"]
+        else:
+            log_file = "anotherAurHelper2.log"
+    elif GLOBAL_TOML_D is not None:
         if "log_file" in GLOBAL_TOML_D:
             log_file = GLOBAL_TOML_D["log_file"]
         else:
@@ -264,6 +264,62 @@ def log_print(*args, **kwargs):
     with open(log_file, "a", encoding="utf-8") as lf:
         kwargs["file"] = lf
         print(*args, **kwargs)
+
+
+def thread_handle_output_stream(
+    handle,
+    output_file,
+    shared_state,
+    print_to_log=False,
+    ignore_output_file=False,
+):
+    """Reads lines from an input stream "handle" and writes them to
+    "output_file". Flags in "shared_state" determine certain behaviors, such as
+    prepending a timestamp to each line, or the filesize-limit for the
+    "output_file"."""
+
+    log_count = 0
+    limit_reached = False
+    while True:
+        line = handle.readline()
+        if len(line) == 0:
+            break
+
+        if print_to_log:
+            log_print(line.rstrip("\n"))
+
+        if ignore_output_file:
+            continue
+
+        if not limit_reached:
+            nowstring = get_datetime_now()
+            line = nowstring + " " + line
+            log_count += len(line)
+            if log_count > shared_state["toml"]["log_limit"]:
+                limit_reached = True
+                if shared_state["toml"]["error_on_limit"]:
+                    output_file.write(
+                        "\nERROR: Reached log_limit! No longer logging to file!\n"
+                    )
+                    output_file.flush()
+                    log_print(
+                        "ERROR: Reached log_limit! No longer logging to file!",
+                        other_state=other_state,
+                    )
+                    handle.close()
+                    break
+                else:
+                    output_file.write(
+                        "\nWARNING: Reached log_limit! No longer logging to file!\n"
+                    )
+                    output_file.flush()
+                    log_print(
+                        "WARNING: Reached log_limit! No longer logging to file!",
+                        other_state=other_state,
+                    )
+            else:
+                output_file.write(line)
+                output_file.flush()
 
 
 def user_interact(prompt: str, opts: list[str], shared_state: dict) -> str:
@@ -581,19 +637,56 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
 
-        subprocess.run(
-            (
-                "/usr/bin/sudo",
-                "machinectl",
-                "shell",
-                f"{user}@{container}",
-                "/usr/bin/sh",
-                "-c",
-                f"cd {name} && makepkg -c -s --noconfirm",
-            ),
-            check=True,
-            text=True,
-        )
+        nowstring = get_datetime_now()
+        logs_dir_path = pathlib.PosixPath(shared_state["toml"]["logs_dir"])
+        with logs_dir_path.joinpath(
+            "{}_stdout_{}.log".format(name, nowstring)
+        ).open(
+            mode="w", encoding="utf-8"
+        ) as log_stdout, logs_dir_path.joinpath(
+            "{}_stderr_{}.log".format(name, nowstring)
+        ).open(
+            mode="w", encoding="utf-8"
+        ) as log_stderr:
+            p1 = subprocess.Popen(
+                (
+                    "/usr/bin/sudo",
+                    "machinectl",
+                    "shell",
+                    f"{user}@{container}",
+                    "/usr/bin/sh",
+                    "-c",
+                    f"cd {name} && makepkg -c -s --noconfirm",
+                ),
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            print_to_log = shared_state["toml"]["print_build_logs"]
+            tout = threading.Thread(
+                target=thread_handle_output_stream,
+                args=(p1.stdout, log_stdout, shared_state, print_to_log),
+            )
+            terr = threading.Thread(
+                target=thread_handle_output_stream,
+                args=(p1.stderr, log_stderr, shared_state, print_to_log),
+            )
+
+            tout.start()
+            terr.start()
+
+            p1.wait()
+            tout.join()
+            terr.join()
+
+            if p1.returncode is None:
+                raise RuntimeError("pOpen process didn't finish")
+            elif type(p1.returncode) is not int:
+                raise RuntimeError("pOpen process non-integer return-code")
+            elif p1.returncode != 0:
+                raise RuntimeError(
+                    f"pOpen process non-zero return code {p1.returncode}"
+                )
 
         if rsync_package_from_container(entry, shared_state) != 0:
             return 1
@@ -640,6 +733,8 @@ def get_pkgver(
 def verify_to_build(entry: dict, shared_state: dict) -> int:
     """Returns 0 if entry should be built, 1 if it shouldn't be built, 2 on error"""
     name = entry["name"]
+    container = shared_state["toml"]["container_name"]
+    user = shared_state["toml"]["container_user"]
     saved_pkgver = get_pkgver(entry, shared_state)
     if saved_pkgver is None:
         log_print(f"{name} has not been built; should be built")
@@ -655,20 +750,132 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                 f"{user}@{container}",
                 "/usr/bin/bash",
                 "-c",
-                f"cd {name} && makepkg -c -s --noconfirm 1>&2 && source PKGBUILD >&/dev/null && echo ${{epoch:-0}}:${{pkgver}}-${{pkgrel}}",
+                f'cd {name} && makepkg -c -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
             ),
             check=True,
             text=True,
             capture_output=True,
         )
+        # log_print("DEBUG: stdout is: " + run_ret.stdout.strip())
         PKGBUILD_ver = ArchPkgVersion(run_ret.stdout.strip())
     except:
         log_print("ERROR: Failed to verify if entry should be built!")
+        log_print(repr(sys.exception()))
         return 2
+    log_print(
+        f"{name}: PKGBUILD: {str(PKGBUILD_ver)}, saved: {str(saved_pkgver)}"
+    )
     if PKGBUILD_ver > saved_pkgver:
         return 0
     else:
         return 1
+
+
+def enumerate_clone_dir(
+    entry: dict, shared_state: dict
+) -> list[pathlib.PosixPath]:
+    """Returns a list of files in the clone dir."""
+    name = entry["name"]
+    clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
+    clone_dir = clones_dir / name
+    return list(clone_dir.iterdir())
+
+
+def finalize_build(entry: dict, shared_state: dict) -> int:
+    """Returns 0 on success."""
+    pre_enumerate = shared_state["pre_enumerate"]
+    post_enumerate = enumerate_clone_dir(entry, shared_state)
+    new_enumerate = list(
+        filter(lambda i: i not in pre_enumerate, post_enumerate)
+    )
+    pkgs = list()
+    for item in new_enumerate:
+        if IS_PKG_REGEX.fullmatch(item.as_posix()) is not None:
+            pkg = item.as_posix()
+            pkgs.append(pkg)
+            try:
+                process_env = dict()
+                process_env["GNUPGHOME"] = shared_state["toml"][
+                    "signing_gpg_dir"
+                ]
+                subprocess.run(
+                    (
+                        "/usr/bin/gpg",
+                        "--default-key",
+                        shared_state["toml"]["signing_gpg_fingerprint"],
+                        "--pinentry-mode",
+                        "loopback",
+                        "--detach-sign",
+                        pkg,
+                    ),
+                    check=True,
+                    text=True,
+                    env=process_env,
+                )
+            except:
+                log_print(f"ERROR: Failed to sign pkg {pkg}!")
+                return 1
+    pkgs_out_path = pathlib.PosixPath(shared_state["toml"]["pkgs_out_dir"])
+    repo_name = shared_state["toml"]["aur_repo_name"]
+    repo_path = pkgs_out_path / f"{repo_name}.db.tar"
+    repo_sig_link = pkgs_out_path / f"{repo_name}.db.sig"
+    repo_add_cmd = ["/usr/bin/repo-add", "--include-sigs", repo_path.as_posix()]
+    repo_add_cmd.extend(pkgs)
+    try:
+        subprocess.run(
+            repo_add_cmd,
+            check=True,
+            text=True,
+        )
+    except:
+        log_print(f"ERROR: Failed to add pkg {pkg}!")
+        return 1
+    for pkg in pkgs:
+        pkg_path = pathlib.PosixPath(pkg)
+        pkg_sig_path = pathlib.PosixPath(pkg + ".sig")
+        dest_pkg_path = pkgs_out_path / pkg_path.name
+        dest_pkg_sig_path = pkgs_out_path / pkg_sig_path.name
+        with pkg_path.open(mode="rb") as r, dest_pkg_path.open(mode="wb") as w:
+            ret_read = r.read(4096)
+            while len(ret_read) > 0:
+                ret_write = w.write(ret_read)
+                ret_read = r.read(4096)
+        with pkg_sig_path.open(mode="rb") as r, dest_pkg_sig_path.open(
+            mode="wb"
+        ) as w:
+            ret_read = r.read(4096)
+            while len(ret_read) > 0:
+                ret_write = w.write(ret_read)
+                ret_read = r.read(4096)
+        pkg_path.unlink()
+        pkg_sig_path.unlink()
+    try:
+        process_env = dict()
+        process_env["GNUPGHOME"] = shared_state["toml"]["signing_gpg_dir"]
+        subprocess.run(
+            (
+                "/usr/bin/gpg",
+                "--default-key",
+                shared_state["toml"]["signing_gpg_fingerprint"],
+                "--pinentry-mode",
+                "loopback",
+                "--detach-sign",
+                repo_path.as_posix(),
+            ),
+            check=True,
+            text=True,
+            env=process_env,
+        )
+    except:
+        log_print(f"ERROR: Failed to sign {repo_path.as_posix()}!")
+        log_print(repr(sys.exception()))
+        return 1
+    try:
+        repo_sig_link.symlink_to(f"{repo_name}.db.tar.sig")
+    except:
+        pass
+
+    return 0
 
 
 def main():
@@ -836,19 +1043,37 @@ def main():
     for idx in range(len(toml_d["entry"])):
         entry = toml_d["entry"][idx]
         if entry["name"] in shared_state["skipped"]:
-            log_print(f'  {entry["name"]} Skipped, will not be built')
+            log_print(f'  {entry["name"]}')
     log_print("List of not skipped:")
     for idx in range(len(toml_d["entry"])):
         entry = toml_d["entry"][idx]
         if entry["name"] in shared_state["confirmed"]:
-            log_print(f'  {entry["name"]} Will be built (if out of date)')
+            log_print(f'  {entry["name"]}')
+    if len(shared_state["confirmed"]) == 0:
+        log_print("Nothing to build, stopping.")
+        return
+    log_print("Continue?")
+    user_result = user_interact_alpha(
+        "Build pkgs?", ["Continue", "Abort"], True, shared_state
+    )
+    if user_result != "Continue":
+        return
     log_print("Building packages...")
     for idx in range(len(toml_d["entry"])):
         entry = toml_d["entry"][idx]
         if entry["name"] in shared_state["confirmed"]:
+            shared_state["pre_enumerate"] = enumerate_clone_dir(
+                entry, shared_state
+            )
             build_ret = build_pkg(entry, shared_state)
             if build_ret != 0:
                 log_print(f"WARNING: Failed to build \"{entry['name']}\"!")
+                continue
+            ret = finalize_build(entry, shared_state)
+            if ret != 0:
+                log_print(f"WARNING: Failed to finalize \"{entry['name']}\"!")
+                continue
+    log_print("Done.")
 
 
 if __name__ == "__main__":
