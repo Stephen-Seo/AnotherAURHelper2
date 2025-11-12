@@ -52,9 +52,23 @@ Create a 'aur' user in the container with `useradd -m -s /bin/bash aur`, and set
 the password for this user.
 
 Also ensure 'aur' is "wheel" and that the sudoers file allows users in "wheel".
+Also ensure that the build user ("aur") can install packages without prompting
+for the password. (This is optional):
 
 $ gpasswd -a aur wheel
 $ EDITOR=vim visudo
+
+...
+# allows wheel to use sudo
+%wheel ALL=(ALL:ALL) ALL
+
+# allows wheel to run the following "pacman" commands without a password
+%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman -S *
+%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman --noconfirm -S *
+%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman -Sy *
+%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman --noconfirm -Sy *
+...
+
 
 You must set up networking by either host networking mode or forwarding as
 mentioned here: https://wiki.archlinux.org/title/Systemd-nspawn#Networking
