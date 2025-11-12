@@ -28,13 +28,6 @@ skip_branch_up_to_date = true
 only_check_SRCINFO = true
 
 [[entry]]
-name = "chrome-gnome-shell"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "chrome-gnome-shell"
-skip_branch_up_to_date = true
-only_check_SRCINFO = true
-
-[[entry]]
 name = "curseforge"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "curseforge"

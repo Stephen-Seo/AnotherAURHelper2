@@ -250,39 +250,24 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         time.sleep(1)
         user = shared_state["toml"]["container_user"]
         c_addr = shared_state["toml"]["container_addr"]
-        if "container_identity_file" in shared_state["toml"]:
-            id_file = shared_state["toml"]["container_identity_file"]
-            subprocess.run(
-                ("/usr/bin/ssh-add", id_file),
-                check=True,
-            )
-            run_ret = subprocess.run(
-                (
-                    "/usr/bin/rsync",
-                    "-e",
-                    f"ssh -i {id_file}",
-                    "-riv",
-                    f"--exclude=.git*",
-                    f"{clone_dir}/",
-                    f"{user}@{c_addr}:{name}/",
-                ),
-                check=True,
-                text=True,
-            )
-        else:
-            run_ret = subprocess.run(
-                (
-                    "/usr/bin/rsync",
-                    "-riv",
-                    f"--exclude=.git*",
-                    f"{clone_dir}/",
-                    f"{user}@{c_addr}:{name}/",
-                ),
-                check=True,
-                text=True,
-            )
-        time.sleep(0.5)
-        run_ret = subprocess.run(
+
+        id_file = shared_state["toml"]["container_identity_file"]
+        subprocess.run(
+            (
+                "/usr/bin/rsync",
+                "-e",
+                f"ssh -i {id_file}",
+                "-rivt",
+                "--exclude=.git*",
+                f"{clone_dir}/",
+                f"{user}@{c_addr}:{name}/",
+            ),
+            check=True,
+            text=True,
+        )
+
+        time.sleep(0.3)
+        subprocess.run(
             (
                 "/usr/bin/sudo",
                 "machinectl",
@@ -293,7 +278,23 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                 f"cd {name} && makepkg -c -s --nobuild",
             ),
             check=True,
+            text=True,
         )
+
+        subprocess.run(
+            (
+                "/usr/bin/rsync",
+                "-e",
+                f"ssh -i {id_file}",
+                "-rivt",
+                "--exclude=src*",
+                f"{user}@{c_addr}:{name}/",
+                f"{clone_dir}/",
+            ),
+            check=True,
+            text=True,
+        )
+
         subprocess.run(
             ("/usr/bin/sudo", "machinectl", "poweroff", container), check=True
         )
@@ -310,6 +311,7 @@ def main():
         description="Builds AUR pkgs in a chroot handled by systemd-nspawn",
     )
     parser.add_argument("-c", "--config")
+    parser.add_argument("-p", "--pkg", action="append")
     args = parser.parse_args()
 
     if args.config is None:
@@ -368,12 +370,40 @@ def main():
         log_print(repr(sys.exception()), toml=toml_d)
         return
 
+    log_print("Preload ssh key into ssh-agent with ssh-add?")
+    user_result = user_interact_alpha(
+        "Continue?", ["Add to ssh-agent", "Skip"], True, shared_state
+    )
+
+    if user_result == "interrupt":
+        return
+    elif user_result == "Add to ssh-agent":
+        try:
+            subprocess.run(
+                (
+                    "/usr/bin/ssh-add",
+                    "-t",
+                    "8h",
+                    toml_d["container_identity_file"],
+                ),
+                check=True,
+                text=True,
+            )
+        except:
+            log_print("ERROR: Failed to add key to ssh-agent!")
+            log_print(repr(sys.exception()))
+            return
+
     log_print("Begin checking each package...")
     shared_state["skipped"] = set()
     shared_state["confirmed"] = set()
     idx = 0
     while idx < len(toml_d["entry"]):
         entry = toml_d["entry"][idx]
+        if len(args.pkg) != 0 and entry["name"] not in args.pkg:
+            idx += 1
+            shared_state["skipped"].add(entry["name"])
+            continue
         if check_clone_package(entry, shared_state) == 0:
             log_print(
                 f"""Skipping "{entry['name']}" due to clone/update issue..."""
@@ -397,10 +427,12 @@ def main():
             idx += 1
             continue
         user_result = user_interact_alpha(
-            "OK with pkg?", ["OK", "Not OK"], True, shared_state
+            "OK with pkg?", ["OK", "Not OK", "Retry"], True, shared_state
         )
         if user_result == "interrupt":
             return
+        elif user_result == "Retry":
+            continue
         elif user_result != "OK":
             log_print(
                 f"""Skipping "{entry['name']}" due to user not OK with pkg..."""
@@ -408,6 +440,7 @@ def main():
             shared_state["skipped"].add(entry["name"])
             idx += 1
             continue
+        log_print(f"User is OK with \"{entry['name']}\"")
         shared_state["confirmed"].add(entry["name"])
         idx += 1
 
@@ -417,12 +450,12 @@ def main():
     for idx in range(len(toml_d["entry"])):
         entry = toml_d["entry"][idx]
         if entry["name"] in shared_state["skipped"]:
-            log_print(f'Entry {entry["name"]} Skipped, will not be built')
+            log_print(f'  {entry["name"]} Skipped, will not be built')
     log_print("List of not skipped:")
     for idx in range(len(toml_d["entry"])):
         entry = toml_d["entry"][idx]
         if entry["name"] in shared_state["confirmed"]:
-            log_print(f'Entry {entry["name"]} Will be built (if out of date)')
+            log_print(f'  {entry["name"]} Will be built (if out of date)')
 
 
 if __name__ == "__main__":
