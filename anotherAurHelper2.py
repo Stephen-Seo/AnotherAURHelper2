@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 # ISC License
-# 
+#
 # Copyright (c) 2025 Stephen Seo
-# 
+#
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
 # copyright notice and this permission notice appear in all copies.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
 # REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
 # AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
@@ -320,7 +320,6 @@ def thread_handle_output_stream(
                     output_file.flush()
                     log_print(
                         "ERROR: Reached log_limit! No longer logging to file!",
-                        other_state=other_state,
                     )
                     handle.close()
                     break
@@ -331,7 +330,6 @@ def thread_handle_output_stream(
                     output_file.flush()
                     log_print(
                         "WARNING: Reached log_limit! No longer logging to file!",
-                        other_state=other_state,
                     )
             else:
                 output_file.write(line)
