@@ -87,9 +87,6 @@ Add the following text snippet to /etc/systemd/nspawn/aurbuild.nspawn :
 [Exec]
 Ephemeral=on
 
-[Files]
-Bind=/var/cache/pacman/pkg
-
 This config will cause all future starts of the container to be a clone of the
 original container and when the container is stopped, the clone is erased. In
 other words, the container becomes immutable and every time it is started with
