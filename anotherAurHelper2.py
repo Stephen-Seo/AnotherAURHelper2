@@ -1255,6 +1255,7 @@ def main():
     )
     parser.add_argument("-c", "--config")
     parser.add_argument("-p", "--pkg", action="append")
+    parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 
     if args.config is None:
@@ -1393,9 +1394,18 @@ def main():
     idx = 0
     while idx < len(toml_d["entry"]):
         entry = toml_d["entry"][idx]
-        if args.pkg is not None and entry["name"] not in args.pkg:
+        if args.pkg is not None:
+            if entry["name"] not in args.pkg:
+                idx += 1
+                shared_state["skipped"].add(entry["name"])
+                continue
+            elif args.force:
+                idx += 1
+                shared_state["confirmed"].add(entry["name"])
+                continue
+        elif args.force:
             idx += 1
-            shared_state["skipped"].add(entry["name"])
+            shared_state["confirmed"].add(entry["name"])
             continue
         log_print(f"Checking {entry['name']}...")
         if check_clone_package(entry, shared_state) == 0:
