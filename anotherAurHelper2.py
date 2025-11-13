@@ -494,27 +494,19 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
     name = entry["name"]
     clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
     clone_dir = clones_dir / name
+    container = shared_state["toml"]["container_name"]
+    user = shared_state["toml"]["container_user"]
     try:
-        container = shared_state["toml"]["container_name"]
         if start_container(shared_state) != 0:
             return 1
-        user = shared_state["toml"]["container_user"]
-        c_addr = shared_state["toml"]["container_addr"]
 
-        id_file = shared_state["toml"]["container_identity_file"]
-        subprocess.run(
-            (
-                "/usr/bin/rsync",
-                "-e",
-                f"ssh -i {id_file}",
-                "-rivt",
-                "--exclude=.git*",
-                f"{clone_dir}/",
-                f"{user}@{c_addr}:{name}/",
-            ),
-            check=True,
-            text=True,
-        )
+        if shared_state["toml"]["build_in_tmpfs"]:
+            dest_dir = f"/tmp/{name}"
+        else:
+            dest_dir = name
+
+        if rsync_package_to_container(entry, shared_state) != 0:
+            return 1
 
         time.sleep(0.3)
         subprocess.run(
@@ -525,25 +517,14 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                 f"{user}@{container}",
                 "/usr/bin/sh",
                 "-c",
-                f"cd {name} && makepkg -c -s --nobuild --noconfirm",
+                f"cd {dest_dir} && makepkg -c -s --nobuild --noconfirm",
             ),
             check=True,
             text=True,
         )
 
-        subprocess.run(
-            (
-                "/usr/bin/rsync",
-                "-e",
-                f"ssh -i {id_file}",
-                "-rivt",
-                "--exclude=src*",
-                f"{user}@{c_addr}:{name}/",
-                f"{clone_dir}/",
-            ),
-            check=True,
-            text=True,
-        )
+        if rsync_package_from_container(entry, shared_state) != 0:
+            return 1
 
         subprocess.run(
             ("/usr/bin/sudo", "machinectl", "poweroff", container), check=True
@@ -585,6 +566,11 @@ def rsync_package_to_container(entry: dict, shared_state: dict) -> int:
     user = shared_state["toml"]["container_user"]
     c_addr = shared_state["toml"]["container_addr"]
     id_file = shared_state["toml"]["container_identity_file"]
+    if shared_state["toml"]["build_in_tmpfs"]:
+        dest_dir = f"/tmp/{name}"
+    else:
+        dest_dir = name
+    full_dest_dir = f"{user}@{c_addr}:{dest_dir}/"
     try:
         subprocess.run(
             (
@@ -594,13 +580,14 @@ def rsync_package_to_container(entry: dict, shared_state: dict) -> int:
                 "-rivt",
                 "--exclude=.git*",
                 f"{clone_dir}/",
-                f"{user}@{c_addr}:{name}/",
+                full_dest_dir,
             ),
             check=True,
             text=True,
         )
     except:
         log_print("ERROR: Failed to rsync to container!")
+        log_print(repr(sys.exception()))
         return 1
     return 0
 
@@ -613,6 +600,11 @@ def rsync_package_from_container(entry: dict, shared_state: dict) -> int:
     user = shared_state["toml"]["container_user"]
     c_addr = shared_state["toml"]["container_addr"]
     id_file = shared_state["toml"]["container_identity_file"]
+    if shared_state["toml"]["build_in_tmpfs"]:
+        dest_dir = f"/tmp/{name}"
+    else:
+        dest_dir = name
+    full_dest_dir = f"{user}@{c_addr}:{dest_dir}/"
     try:
         subprocess.run(
             (
@@ -622,7 +614,7 @@ def rsync_package_from_container(entry: dict, shared_state: dict) -> int:
                 "-rivt",
                 "--exclude=src*",
                 "--exclude=pkg*",
-                f"{user}@{c_addr}:{name}/",
+                full_dest_dir,
                 f"{clone_dir}/",
             ),
             check=True,
@@ -630,6 +622,7 @@ def rsync_package_from_container(entry: dict, shared_state: dict) -> int:
         )
     except:
         log_print("ERROR: Failed to rsync from container!")
+        log_print(repr(sys.exception()))
         return 1
     return 0
 
@@ -639,6 +632,10 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
     name = entry["name"]
     clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
     clone_dir = clones_dir / name
+    if shared_state["toml"]["build_in_tmpfs"]:
+        dest_dir = f"/tmp/{name}"
+    else:
+        dest_dir = name
     try:
         container = shared_state["toml"]["container_name"]
         if start_container(shared_state) != 0:
@@ -670,7 +667,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     f"{user}@{container}",
                     "/usr/bin/sh",
                     "-c",
-                    f"cd {name} && makepkg -c -s --noconfirm",
+                    f"cd {dest_dir} && makepkg -c -s --noconfirm",
                 ),
                 text=True,
                 stdout=subprocess.PIPE,
@@ -704,6 +701,10 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
 
         if rsync_package_from_container(entry, shared_state) != 0:
             return 1
+
+        subprocess.run(
+            ("/usr/bin/sudo", "machinectl", "poweroff", container), check=True
+        )
     except:
         log_print(f"""ERROR: Failed to build "{name}"!""")
         log_print(repr(sys.exception()))
@@ -753,6 +754,11 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     if saved_pkgver is None:
         log_print(f"{name} has not been built; should be built")
         return 0
+    if shared_state["toml"]["build_in_tmpfs"]:
+        dest_dir = f"/tmp/{name}"
+    else:
+        dest_dir = name
+
     start_container(shared_state)
     rsync_package_to_container(entry, shared_state)
     try:
@@ -764,7 +770,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                 f"{user}@{container}",
                 "/usr/bin/bash",
                 "-c",
-                f'cd {name} && makepkg -c -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
+                f'cd {dest_dir} && makepkg -c -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
             ),
             check=True,
             text=True,

@@ -16,6 +16,7 @@ log_limit = 4294967296
 logs_dir = "/home/stephen/Documents/aurbuild/buildlogs"
 error_on_limit = true
 print_build_logs = true
+build_in_tmpfs = true
 
 
 [[entry]]
