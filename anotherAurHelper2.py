@@ -495,10 +495,32 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
     clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
     clone_dir = clones_dir / name
     container = shared_state["toml"]["container_name"]
+    id_file = shared_state["toml"]["container_identity_file"]
+    c_addr = shared_state["toml"]["container_addr"]
     user = shared_state["toml"]["container_user"]
+    aur_deps = get_aur_deps(entry, shared_state)
     try:
         if start_container(shared_state) != 0:
             return 1
+
+        for aur_dep in aur_deps:
+            dest = pathlib.PosixPath("/tmp")
+            dest = dest / aur_dep.name
+            if rsync_file_to_dest(aur_dep, dest.as_posix(), shared_state) != 0:
+                log_print(
+                    f'ERROR: Failed to send aur_dep "{aur_dep.name}" to chroot!'
+                )
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"sudo pacman --noconfirm -U {dest.as_posix()}",
+                ),
+                check=True,
+            )
 
         if shared_state["toml"]["build_in_tmpfs"]:
             dest_dir = f"/tmp/{name}"
@@ -511,12 +533,10 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         time.sleep(0.3)
         subprocess.run(
             (
-                "/usr/bin/sudo",
-                "machinectl",
-                "shell",
-                f"{user}@{container}",
-                "/usr/bin/sh",
-                "-c",
+                "/usr/bin/ssh",
+                "-i",
+                id_file,
+                f"{user}@{c_addr}",
                 f"cd {dest_dir} && makepkg -c -s --nobuild --noconfirm",
             ),
             check=True,
@@ -632,6 +652,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
     name = entry["name"]
     clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
     clone_dir = clones_dir / name
+    aur_deps = get_aur_deps(entry, shared_state)
     if shared_state["toml"]["build_in_tmpfs"]:
         dest_dir = f"/tmp/{name}"
     else:
@@ -648,6 +669,25 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
 
+        for aur_dep in aur_deps:
+            dest = pathlib.PosixPath("/tmp")
+            dest = dest / aur_dep.name
+            if rsync_file_to_dest(aur_dep, dest.as_posix(), shared_state) != 0:
+                log_print(
+                    f'ERROR: Failed to send aur_dep "{aur_dep.name}" to chroot!'
+                )
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"sudo pacman --noconfirm -U {dest.as_posix()}",
+                ),
+                check=True,
+            )
+
         nowstring = get_datetime_now()
         logs_dir_path = pathlib.PosixPath(shared_state["toml"]["logs_dir"])
         with logs_dir_path.joinpath(
@@ -661,12 +701,10 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         ) as log_stderr:
             p1 = subprocess.Popen(
                 (
-                    "/usr/bin/sudo",
-                    "machinectl",
-                    "shell",
-                    f"{user}@{container}",
-                    "/usr/bin/sh",
-                    "-c",
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
                     f"cd {dest_dir} && makepkg -c -s --noconfirm",
                 ),
                 text=True,
@@ -751,6 +789,9 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     container = shared_state["toml"]["container_name"]
     user = shared_state["toml"]["container_user"]
     saved_pkgver = get_pkgver(entry, shared_state)
+    aur_deps = get_aur_deps(entry, shared_state)
+    id_file = shared_state["toml"]["container_identity_file"]
+    c_addr = shared_state["toml"]["container_addr"]
     if saved_pkgver is None:
         log_print(f"{name} has not been built; should be built")
         return 0
@@ -762,14 +803,30 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     start_container(shared_state)
     rsync_package_to_container(entry, shared_state)
     try:
+        for aur_dep in aur_deps:
+            dest = pathlib.PosixPath("/tmp")
+            dest = dest / aur_dep.name
+            if rsync_file_to_dest(aur_dep, dest.as_posix(), shared_state) != 0:
+                log_print(
+                    f'ERROR: Failed to send aur_dep "{aur_dep.name}" to chroot!'
+                )
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"sudo pacman --noconfirm -U {dest.as_posix()}",
+                ),
+                check=True,
+            )
         run_ret = subprocess.run(
             (
-                "/usr/bin/sudo",
-                "machinectl",
-                "shell",
-                f"{user}@{container}",
-                "/usr/bin/bash",
-                "-c",
+                "/usr/bin/ssh",
+                "-i",
+                id_file,
+                f"{user}@{c_addr}",
                 f'cd {dest_dir} && makepkg -c -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
             ),
             check=True,
@@ -821,6 +878,7 @@ def finalize_build(entry: dict, shared_state: dict) -> int:
                 subprocess.run(
                     (
                         "/usr/bin/gpg",
+                        "--yes",
                         "--default-key",
                         shared_state["toml"]["signing_gpg_fingerprint"],
                         "--pinentry-mode",
@@ -875,6 +933,7 @@ def finalize_build(entry: dict, shared_state: dict) -> int:
         subprocess.run(
             (
                 "/usr/bin/gpg",
+                "--yes",
                 "--default-key",
                 shared_state["toml"]["signing_gpg_fingerprint"],
                 "--pinentry-mode",
@@ -895,6 +954,77 @@ def finalize_build(entry: dict, shared_state: dict) -> int:
     except:
         pass
 
+    return 0
+
+
+def get_aur_deps(entry: dict, shared_state: dict) -> list[pathlib.PosixPath]:
+    """Returns a list to each aur dep in the pkgs-out dir."""
+    if "aur_deps" not in entry or entry["aur_deps"] is None:
+        return list()
+    name = entry["name"]
+    pkgs_out_dir = pathlib.PosixPath(shared_state["toml"]["pkgs_out_dir"])
+    repo_name = shared_state["toml"]["aur_repo_name"]
+    repo_path = pkgs_out_dir / f"{repo_name}.db.tar"
+    try:
+        with tarfile.open(name=repo_path) as f:
+            repo_names = f.getnames()
+    except:
+        log_print(f'Failed to open "{repo_path}"!')
+        return None
+    aur_deps = list()
+    for aur_dep in entry["aur_deps"]:
+        aur_dep_regex = re.compile(f"""^{aur_dep}-([0-9].*)$""")
+        aur_dep_names = list(
+            filter(
+                lambda p: p.find(name) != -1
+                and p.find("/") == -1
+                and aur_dep_regex.fullmatch(p) is not None,
+                repo_names,
+            )
+        )
+        if len(aur_dep_names) == 1:
+            aur_deps.extend(aur_dep_names)
+        elif len(aur_dep_names) == 0:
+            log_print(f"WARNING: aur dep {aur_dep} not found in tar file!")
+        else:
+            log_print(f"WARNING: aur dep {aur_dep} had multiples in tar file!")
+    aur_deps_out = list()
+    for aur_dep in aur_deps:
+        matching = list(pkgs_out_dir.glob(f"*{aur_dep}*"))
+        matching = list(filter(lambda m: m.suffix != ".sig", matching))
+        if len(matching) == 1:
+            aur_deps_out.extend(matching)
+        elif len(matching) == 0:
+            log_print(f"WARNING: aur dep {aur_dep.name} not found in pkgs dir!")
+        else:
+            log_print(f"WARNING: aur dep {aur_dep.name} multiples in pkgs dir!")
+    return aur_deps_out
+
+
+def rsync_file_to_dest(
+    file: pathlib.PosixPath, dest: str, shared_state: dict
+) -> int:
+    """Returns 0 on success."""
+    user = shared_state["toml"]["container_user"]
+    c_addr = shared_state["toml"]["container_addr"]
+    id_file = shared_state["toml"]["container_identity_file"]
+    full_dest_dir = f"{user}@{c_addr}:{dest}"
+    try:
+        subprocess.run(
+            (
+                "/usr/bin/rsync",
+                "-e",
+                f"ssh -i {id_file}",
+                "-ivt",
+                file.as_posix(),
+                full_dest_dir,
+            ),
+            check=True,
+        )
+    except:
+        log_print('ERROR: Failed to rsync/send "{dest}"!')
+        log_print(repr(sys.exception()))
+        return 1
     return 0
 
 
