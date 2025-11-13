@@ -550,6 +550,21 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
 
+        if "patches_dir" in entry:
+            patch_dir = (pathlib.PosixPath(entry["patches_dir"]),)
+            if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'cat {{}} | patch -p1'",
+                ),
+                check=True,
+            )
+
         time.sleep(0.3)
         subprocess.run(
             (
@@ -726,6 +741,21 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 check=True,
             )
 
+        if "patches_dir" in entry:
+            patch_dir = (pathlib.PosixPath(entry["patches_dir"]),)
+            if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'cat {{}} | patch -p1'",
+                ),
+                check=True,
+            )
+
         nowstring = get_datetime_now()
         logs_dir_path = pathlib.PosixPath(shared_state["toml"]["logs_dir"])
         with logs_dir_path.joinpath(
@@ -840,7 +870,8 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
         dest_dir = name
 
     start_container(shared_state)
-    rsync_package_to_container(entry, shared_state)
+    if rsync_package_to_container(entry, shared_state) != 0:
+        return 2
     try:
         other_dep_str = ""
         for other_dep in other_deps:
@@ -877,6 +908,22 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                 ),
                 check=True,
             )
+
+        if "patches_dir" in entry:
+            patch_dir = (pathlib.PosixPath(entry["patches_dir"]),)
+            if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'cat {{}} | patch -p1'",
+                ),
+                check=True,
+            )
+
         run_ret = subprocess.run(
             (
                 "/usr/bin/ssh",
@@ -1073,6 +1120,33 @@ def rsync_file_to_dest(
                 f"ssh -i {id_file}",
                 "-ivt",
                 file.as_posix(),
+                full_dest_dir,
+            ),
+            check=True,
+        )
+    except:
+        log_print('ERROR: Failed to rsync/send "{dest}"!')
+        log_print(repr(sys.exception()))
+        return 1
+    return 0
+
+
+def rsync_dir_to_dest(
+    dir_path: pathlib.PosixPath, dest: str, shared_state: dict
+) -> int:
+    """Returns 0 on success."""
+    user = shared_state["toml"]["container_user"]
+    c_addr = shared_state["toml"]["container_addr"]
+    id_file = shared_state["toml"]["container_identity_file"]
+    full_dest_dir = f"{user}@{c_addr}:{dest}"
+    try:
+        subprocess.run(
+            (
+                "/usr/bin/rsync",
+                "-e",
+                f"ssh -i {id_file}",
+                "-ivt",
+                dir_path.as_posix() + "/",
                 full_dest_dir,
             ),
             check=True,

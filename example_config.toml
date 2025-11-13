@@ -104,6 +104,7 @@ name = "icecat"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "icecat"
 skip_branch_up_to_date = true
+patches_dir = "/home/stephen/Documents/aurbuild/patches/icecat"
 
 [[entry]]
 name = "librewolf"
