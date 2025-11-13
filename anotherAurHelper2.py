@@ -451,12 +451,12 @@ def check_clone_package(entry: dict, shared_state: dict) -> int:
             run_result = subprocess.run(
                 ("/usr/bin/git", "restore", "."),
                 check=True,
-                cwd=clone_dir,
+                cwd=clone_dir.as_posix(),
             )
             run_result = subprocess.run(
                 ("/usr/bin/git", "pull"),
                 check=True,
-                cwd=clone_dir,
+                cwd=clone_dir.as_posix(),
             )
         except:
             log_print(f'ERROR: Failed to update "{name}"!')
@@ -472,9 +472,36 @@ def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
     clone_dir = clones_dir / name
     try:
         subprocess.run(
+            ("/usr/bin/git", "restore", "."),
+            check=True,
+            cwd=clone_dir.as_posix(),
+        )
+        if "patches_dir" in entry:
+            patches_path = pathlib.PosixPath(entry["patches_dir"])
+            subprocess.run(
+                (
+                    "/usr/bin/find",
+                    patches_path.as_posix(),
+                    "-type",
+                    "f",
+                    "-exec",
+                    "sh",
+                    "-c",
+                    "patch -p1 < {}",
+                    ";",
+                ),
+                check=True,
+                cwd=clone_dir.as_posix(),
+            )
+        subprocess.run(
             ("/usr/bin/env", shared_state["toml"]["editor"], "PKGBUILD"),
             check=True,
-            cwd=clone_dir,
+            cwd=clone_dir.as_posix(),
+        )
+        subprocess.run(
+            ("/usr/bin/git", "restore", "."),
+            check=True,
+            cwd=clone_dir.as_posix(),
         )
     except:
         log_print(f"""ERROR: Failed to check "{name}"'s PKGBUILD!""")
@@ -551,7 +578,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
             return 1
 
         if "patches_dir" in entry:
-            patch_dir = (pathlib.PosixPath(entry["patches_dir"]),)
+            patch_dir = pathlib.PosixPath(entry["patches_dir"])
             if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
                 return 1
             subprocess.run(
@@ -560,7 +587,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'cat {{}} | patch -p1'",
+                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
                 ),
                 check=True,
             )
@@ -580,6 +607,12 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
 
         if rsync_package_from_container(entry, shared_state) != 0:
             return 1
+
+        run_result = subprocess.run(
+            ("/usr/bin/git", "restore", "."),
+            check=True,
+            cwd=clone_dir.as_posix(),
+        )
 
         subprocess.run(
             ("/usr/bin/sudo", "machinectl", "poweroff", container), check=True
@@ -705,6 +738,21 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
 
+        if "patches_dir" in entry:
+            patch_dir = pathlib.PosixPath(entry["patches_dir"])
+            if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
+                ),
+                check=True,
+            )
+
         other_dep_str = ""
         for other_dep in other_deps:
             if len(other_dep_str) == 0:
@@ -737,21 +785,6 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     id_file,
                     f"{user}@{c_addr}",
                     f"sudo pacman --noconfirm -U {dest.as_posix()}",
-                ),
-                check=True,
-            )
-
-        if "patches_dir" in entry:
-            patch_dir = (pathlib.PosixPath(entry["patches_dir"]),)
-            if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
-                return 1
-            subprocess.run(
-                (
-                    "/usr/bin/ssh",
-                    "-i",
-                    id_file,
-                    f"{user}@{c_addr}",
-                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'cat {{}} | patch -p1'",
                 ),
                 check=True,
             )
@@ -873,6 +906,21 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     if rsync_package_to_container(entry, shared_state) != 0:
         return 2
     try:
+        if "patches_dir" in entry:
+            patch_dir = pathlib.PosixPath(entry["patches_dir"])
+            if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
+                ),
+                check=True,
+            )
+
         other_dep_str = ""
         for other_dep in other_deps:
             if len(other_dep_str) == 0:
@@ -905,21 +953,6 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                     id_file,
                     f"{user}@{c_addr}",
                     f"sudo pacman --noconfirm -U {dest.as_posix()}",
-                ),
-                check=True,
-            )
-
-        if "patches_dir" in entry:
-            patch_dir = (pathlib.PosixPath(entry["patches_dir"]),)
-            if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
-                return 1
-            subprocess.run(
-                (
-                    "/usr/bin/ssh",
-                    "-i",
-                    id_file,
-                    f"{user}@{c_addr}",
-                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'cat {{}} | patch -p1'",
                 ),
                 check=True,
             )
@@ -1168,7 +1201,9 @@ def rsync_file_to_dest(
             check=True,
         )
     except:
-        log_print('ERROR: Failed to rsync/send "{dest}"!')
+        log_print(
+            f'ERROR: Failed to rsync/send "{file.as_posix()}" -> "{dest}" file!'
+        )
         log_print(repr(sys.exception()))
         return 1
     return 0
@@ -1188,14 +1223,16 @@ def rsync_dir_to_dest(
                 "/usr/bin/rsync",
                 "-e",
                 f"ssh -i {id_file}",
-                "-ivt",
+                "-rivt",
                 dir_path.as_posix() + "/",
                 full_dest_dir,
             ),
             check=True,
         )
     except:
-        log_print('ERROR: Failed to rsync/send "{dest}"!')
+        log_print(
+            f'ERROR: Failed to rsync/send "{dir_path.as_posix()}" -> "{dest}" directory!'
+        )
         log_print(repr(sys.exception()))
         return 1
     return 0
@@ -1367,17 +1404,38 @@ def main():
             idx += 1
             continue
         if run_prepare_only(entry, shared_state) == 1:
-            log_print(
-                f"""Skipping "{entry['name']}" due to failure to "prepare"..."""
+            log_print(f'"{entry['name']}" failed to prepare!')
+            user_result = user_interact_alpha(
+                "What to do?",
+                ["Skip", "Force build", "Abort"],
+                True,
+                shared_state,
             )
-            shared_state["skipped"].add(entry["name"])
-            idx += 1
-            continue
+            if user_result == "Abort" or user_result == "interrupt":
+                return
+            elif user_result == "Skip":
+                log_print(
+                    f"""Skipping "{entry['name']}" due to failure to "prepare"..."""
+                )
+                shared_state["skipped"].add(entry["name"])
+                idx += 1
+                continue
+            elif user_result == "Force build":
+                shared_state["confirmed"].add(entry["name"])
+                idx += 1
+                continue
         user_result = user_interact_alpha(
-            "OK with pkg?", ["OK", "Not OK", "Retry"], True, shared_state
+            "OK with pkg?",
+            ["OK", "Not OK", "Force build", "Retry"],
+            True,
+            shared_state,
         )
         if user_result == "interrupt":
             return
+        elif user_result == "Force build":
+            shared_state["confirmed"].add(entry["name"])
+            idx += 1
+            continue
         elif user_result == "Retry":
             continue
         elif user_result != "OK":

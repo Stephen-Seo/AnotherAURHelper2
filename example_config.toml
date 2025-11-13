@@ -162,6 +162,7 @@ only_check_SRCINFO = true
 name = "ncmpcpp"
 skip_branch_up_to_date = true
 repo_path = "https://gitlab.archlinux.org/archlinux/packaging/packages/ncmpcpp.git"
+patches_dir = "/home/stephen/Documents/aurbuild/patches/ncmpcpp"
 
 [[entry]]
 name = "nouveau-fw"
