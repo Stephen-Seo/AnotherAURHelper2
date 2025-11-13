@@ -500,7 +500,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
     user = shared_state["toml"]["container_user"]
-    other_deps = entry["other_deps"]
+    other_deps = entry["other_deps"] if "other_deps" in entry else list()
     aur_deps = get_aur_deps(entry, shared_state)
     try:
         if start_container(shared_state) != 0:
@@ -687,7 +687,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
     name = entry["name"]
     clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
     clone_dir = clones_dir / name
-    other_deps = entry["other_deps"]
+    other_deps = entry["other_deps"] if "other_deps" in entry else list()
     aur_deps = get_aur_deps(entry, shared_state)
     if shared_state["toml"]["build_in_tmpfs"]:
         dest_dir = f"/tmp/{name}"
@@ -857,7 +857,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     container = shared_state["toml"]["container_name"]
     user = shared_state["toml"]["container_user"]
     saved_pkgver = get_pkgver(entry, shared_state)
-    other_deps = entry["other_deps"]
+    other_deps = entry["other_deps"] if "other_deps" in entry else list()
     aur_deps = get_aur_deps(entry, shared_state)
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
@@ -978,27 +978,48 @@ def finalize_build(entry: dict, shared_state: dict) -> int:
                 process_env["GNUPGHOME"] = shared_state["toml"][
                     "signing_gpg_dir"
                 ]
-                subprocess.run(
-                    (
-                        "/usr/bin/gpg",
-                        "--yes",
-                        "--default-key",
-                        shared_state["toml"]["signing_gpg_fingerprint"],
-                        "--pinentry-mode",
-                        "loopback",
-                        "--detach-sign",
-                        pkg,
-                    ),
-                    check=True,
-                    text=True,
-                    env=process_env,
-                )
+                if "sign_gpg_pass" in shared_state:
+                    subprocess.run(
+                        (
+                            "/usr/bin/gpg",
+                            "--batch",
+                            "--passphrase-fd",
+                            "0",
+                            "--default-key",
+                            shared_state["toml"]["signing_gpg_fingerprint"],
+                            "--pinentry-mode",
+                            "loopback",
+                            "--detach-sign",
+                            pkg,
+                        ),
+                        check=True,
+                        text=True,
+                        env=process_env,
+                        input=shared_state["sign_gpg_pass"],
+                    )
+                else:
+                    subprocess.run(
+                        (
+                            "/usr/bin/gpg",
+                            "--yes",
+                            "--default-key",
+                            shared_state["toml"]["signing_gpg_fingerprint"],
+                            "--pinentry-mode",
+                            "loopback",
+                            "--detach-sign",
+                            pkg,
+                        ),
+                        check=True,
+                        text=True,
+                        env=process_env,
+                    )
             except:
                 log_print(f"ERROR: Failed to sign pkg {pkg}!")
                 return 1
     pkgs_out_path = pathlib.PosixPath(shared_state["toml"]["pkgs_out_dir"])
     repo_name = shared_state["toml"]["aur_repo_name"]
     repo_path = pkgs_out_path / f"{repo_name}.db.tar"
+    repo_path_sig = pkgs_out_path / f"{repo_name}.db.tar.sig"
     repo_sig_link = pkgs_out_path / f"{repo_name}.db.sig"
     repo_add_cmd = ["/usr/bin/repo-add", "--include-sigs", repo_path.as_posix()]
     repo_add_cmd.extend(pkgs)
@@ -1031,23 +1052,45 @@ def finalize_build(entry: dict, shared_state: dict) -> int:
         pkg_path.unlink()
         pkg_sig_path.unlink()
     try:
+        if repo_path_sig.exists():
+            repo_path_sig.unlink()
         process_env = dict()
         process_env["GNUPGHOME"] = shared_state["toml"]["signing_gpg_dir"]
-        subprocess.run(
-            (
-                "/usr/bin/gpg",
-                "--yes",
-                "--default-key",
-                shared_state["toml"]["signing_gpg_fingerprint"],
-                "--pinentry-mode",
-                "loopback",
-                "--detach-sign",
-                repo_path.as_posix(),
-            ),
-            check=True,
-            text=True,
-            env=process_env,
-        )
+        if "sign_gpg_pass" in shared_state:
+            subprocess.run(
+                (
+                    "/usr/bin/gpg",
+                    "--batch",
+                    "--passphrase-fd",
+                    "0",
+                    "--default-key",
+                    shared_state["toml"]["signing_gpg_fingerprint"],
+                    "--pinentry-mode",
+                    "loopback",
+                    "--detach-sign",
+                    repo_path.as_posix(),
+                ),
+                check=True,
+                text=True,
+                env=process_env,
+                input=shared_state["sign_gpg_pass"],
+            )
+        else:
+            subprocess.run(
+                (
+                    "/usr/bin/gpg",
+                    "--yes",
+                    "--default-key",
+                    shared_state["toml"]["signing_gpg_fingerprint"],
+                    "--pinentry-mode",
+                    "loopback",
+                    "--detach-sign",
+                    repo_path.as_posix(),
+                ),
+                check=True,
+                text=True,
+                env=process_env,
+            )
     except:
         log_print(f"ERROR: Failed to sign {repo_path.as_posix()}!")
         log_print(repr(sys.exception()))
@@ -1246,6 +1289,56 @@ def main():
             log_print("ERROR: Failed to add key to ssh-agent!")
             log_print(repr(sys.exception()))
             return
+
+    log_print("Preload signing gpg key?")
+    user_result = user_interact_alpha(
+        "Preload GPG key pass?", ["Yes, preload", "Skip"], True, shared_state
+    )
+    if user_result == "Yes, preload":
+        shared_state["sign_gpg_pass"] = getpass.getpass(
+            prompt="signing gpg password: "
+        )
+        test_file_name = "test_file_gpg_signing"
+        test_file_p_base = pathlib.PosixPath("/tmp")
+        test_file_p = test_file_p_base / test_file_name
+        while test_file_p.exists():
+            test_file_name += "_"
+            test_file_p = test_file_p_base / test_file_name
+        test_file_p.write_text(
+            "Test file to sign with gpg to confirm the credentials are correct."
+        )
+
+        try:
+            subprocess.run(
+                (
+                    "gpg",
+                    "--batch",
+                    "--passphrase-fd",
+                    "0",
+                    "--pinentry-mode",
+                    "loopback",
+                    "--default-key",
+                    toml_d["signing_gpg_fingerprint"],
+                    "--detach-sign",
+                    test_file_p.as_posix(),
+                ),
+                check=True,
+                text=True,
+                input=shared_state["sign_gpg_pass"],
+                env={"GNUPGHOME": toml_d["signing_gpg_dir"]},
+            )
+        except:
+            log_print("ERROR: Failed to sign test_file!")
+            log_print(repr(sys.exception()))
+            test_file_p.unlink()
+            (test_file_p_base / (test_file_name + ".sig")).unlink(
+                missing_ok=True
+            )
+            return
+        test_file_p.unlink()
+        (test_file_p_base / (test_file_name + ".sig")).unlink()
+    elif user_result == "interrupt":
+        return
 
     log_print("Begin checking each package...")
     shared_state["skipped"] = set()
