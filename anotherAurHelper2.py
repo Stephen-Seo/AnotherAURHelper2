@@ -480,10 +480,12 @@ def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
         log_print(f"""ERROR: Failed to check "{name}"'s PKGBUILD!""")
         return 1
     check = user_interact_alpha(
-        "Is PKGBUILD OK?", ["OK", "Not OK"], True, shared_state
+        "Is PKGBUILD OK?", ["OK", "Not OK", "Recheck"], True, shared_state
     )
     if check == "interrupt":
         return 3
+    elif check == "Recheck":
+        return check_PKGBUILD(entry, shared_state)
     elif check != "OK":
         return 2
     return 0
@@ -498,11 +500,29 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
     user = shared_state["toml"]["container_user"]
+    other_deps = entry["other_deps"]
     aur_deps = get_aur_deps(entry, shared_state)
     try:
         if start_container(shared_state) != 0:
             return 1
 
+        other_dep_str = ""
+        for other_dep in other_deps:
+            if len(other_dep_str) == 0:
+                other_dep_str = other_dep
+            else:
+                other_dep_str = other_dep_str + " " + other_dep
+        if len(other_dep_str) != 0:
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"sudo pacman --noconfirm -S {other_dep_str}",
+                ),
+                check=True,
+            )
         for aur_dep in aur_deps:
             dest = pathlib.PosixPath("/tmp")
             dest = dest / aur_dep.name
@@ -652,6 +672,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
     name = entry["name"]
     clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
     clone_dir = clones_dir / name
+    other_deps = entry["other_deps"]
     aur_deps = get_aur_deps(entry, shared_state)
     if shared_state["toml"]["build_in_tmpfs"]:
         dest_dir = f"/tmp/{name}"
@@ -669,6 +690,23 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
 
+        other_dep_str = ""
+        for other_dep in other_deps:
+            if len(other_dep_str) == 0:
+                other_dep_str = other_dep
+            else:
+                other_dep_str = other_dep_str + " " + other_dep
+        if len(other_dep_str) != 0:
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"sudo pacman --noconfirm -S {other_dep_str}",
+                ),
+                check=True,
+            )
         for aur_dep in aur_deps:
             dest = pathlib.PosixPath("/tmp")
             dest = dest / aur_dep.name
@@ -789,6 +827,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     container = shared_state["toml"]["container_name"]
     user = shared_state["toml"]["container_user"]
     saved_pkgver = get_pkgver(entry, shared_state)
+    other_deps = entry["other_deps"]
     aur_deps = get_aur_deps(entry, shared_state)
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
@@ -803,6 +842,23 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     start_container(shared_state)
     rsync_package_to_container(entry, shared_state)
     try:
+        other_dep_str = ""
+        for other_dep in other_deps:
+            if len(other_dep_str) == 0:
+                other_dep_str = other_dep
+            else:
+                other_dep_str = other_dep_str + " " + other_dep
+        if len(other_dep_str) != 0:
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"sudo pacman --noconfirm -S {other_dep_str}",
+                ),
+                check=True,
+            )
         for aur_dep in aur_deps:
             dest = pathlib.PosixPath("/tmp")
             dest = dest / aur_dep.name
@@ -1168,8 +1224,10 @@ def main():
         verif_ret = verify_to_build(entry, shared_state)
         if verif_ret == 0:
             shared_state["confirmed"].add(entry["name"])
+            log_print(f"Will build {entry['name']}")
         elif verif_ret == 1:
             shared_state["skipped"].add(entry["name"])
+            log_print(f"Will NOT build {entry['name']}")
         else:
             log_print(
                 f"ERROR: Failed to verify version of pkg \"{entry['name']}\"."
