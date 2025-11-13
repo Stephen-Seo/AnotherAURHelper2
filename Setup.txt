@@ -67,6 +67,8 @@ $ EDITOR=vim visudo
 %wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman --noconfirm -S *
 %wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman -Sy *
 %wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman --noconfirm -Sy *
+%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman -U *
+%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman --noconfirm -U *
 ...
 
 
@@ -84,6 +86,9 @@ Add the following text snippet to /etc/systemd/nspawn/aurbuild.nspawn :
 
 [Exec]
 Ephemeral=on
+
+[Files]
+Bind=/var/cache/pacman/pkg
 
 This config will cause all future starts of the container to be a clone of the
 original container and when the container is stopped, the clone is erased. In
