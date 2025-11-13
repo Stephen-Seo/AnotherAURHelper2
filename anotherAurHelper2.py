@@ -357,7 +357,7 @@ def user_interact_alpha(
     while True:
         for idx in range(len(opts)):
             log_print(
-                f"{opts[idx][0]}: {opts[idx]}",
+                f"  {opts[idx][0]}: {opts[idx]}",
                 toml=shared_state["toml"],
                 end=" ",
             )
@@ -1052,7 +1052,7 @@ def main():
             )
             if user_result == "Retry":
                 continue
-            elif user_result == "Abort":
+            elif user_result == "Abort" or user_result == "interrupt":
                 return
             shared_state["skipped"].add(entry["name"])
         idx += 1
