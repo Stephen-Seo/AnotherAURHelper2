@@ -842,7 +842,12 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             return 1
 
         subprocess.run(
-            ("/usr/bin/sudo", "machinectl", "poweroff", container), check=True
+            ("/usr/bin/sudo", "--stdin", "machinectl", "poweroff", container),
+            check=True,
+            input=shared_state["pass"],
+            text=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
     except:
         log_print(f"""ERROR: Failed to build "{name}"!""")
