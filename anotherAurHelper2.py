@@ -466,7 +466,7 @@ def check_clone_package(entry: dict, shared_state: dict) -> int:
 
 
 def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
-    """Returns 0 on success, 1 on error, 2 if user does not accept PKGBUILD, 3 on interrupt."""
+    """Returns 0 on success, 1 on error, 2 if user does not accept PKGBUILD, 3 on interrupt, 4 to force build."""
     name = entry["name"]
     clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
     clone_dir = clones_dir / name
@@ -507,12 +507,17 @@ def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
         log_print(f"""ERROR: Failed to check "{name}"'s PKGBUILD!""")
         return 1
     check = user_interact_alpha(
-        "Is PKGBUILD OK?", ["OK", "Not OK", "Recheck"], True, shared_state
+        "Is PKGBUILD OK?",
+        ["OK", "Not OK", "Recheck", "Force build"],
+        True,
+        shared_state,
     )
     if check == "interrupt":
         return 3
     elif check == "Recheck":
         return check_PKGBUILD(entry, shared_state)
+    elif check == "Force build":
+        return 4
     elif check != "OK":
         return 2
     return 0
@@ -1403,6 +1408,10 @@ def main():
         check_ret = check_PKGBUILD(entry, shared_state)
         if check_ret == 3:
             return
+        elif check_ret == 4:
+            shared_state["confirmed"].add(entry["name"])
+            idx += 1
+            continue
         elif check_ret != 0:
             log_print(f"""Skipping "{entry['name']}" due to PKGBUILD...""")
             shared_state["skipped"].add(entry["name"])
