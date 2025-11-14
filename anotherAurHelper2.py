@@ -584,7 +584,12 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
 
         if "PKGBUILD_patches_dir" in entry:
             patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
-            if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
+            if (
+                rsync_dir_to_dest(
+                    patch_dir, "/tmp/PKGBUILD_patches/", shared_state
+                )
+                != 0
+            ):
                 return 1
             subprocess.run(
                 (
@@ -592,7 +597,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
+                    f"cd {dest_dir} && find /tmp/PKGBUILD_patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
                 ),
                 check=True,
             )
@@ -604,11 +609,31 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                 "-i",
                 id_file,
                 f"{user}@{c_addr}",
-                f"cd {dest_dir} && makepkg -c -s --nobuild --noconfirm",
+                f"cd {dest_dir} && makepkg -s --nobuild --noconfirm",
             ),
             check=True,
             text=True,
         )
+
+        if "SOURCE_patches_dir" in entry:
+            patch_dir = pathlib.PosixPath(entry["SOURCE_patches_dir"])
+            if (
+                rsync_dir_to_dest(
+                    patch_dir, "/tmp/SOURCE_patches/", shared_state
+                )
+                != 0
+            ):
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"cd {dest_dir} && source ./PKGBUILD && cd src/${{pkgdir:-{name}}} && find /tmp/SOURCE_patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
+                ),
+                check=True,
+            )
 
         if rsync_package_from_container(entry, shared_state) != 0:
             return 1
@@ -745,7 +770,12 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
 
         if "PKGBUILD_patches_dir" in entry:
             patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
-            if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
+            if (
+                rsync_dir_to_dest(
+                    patch_dir, "/tmp/PKGBUILD_patches/", shared_state
+                )
+                != 0
+            ):
                 return 1
             subprocess.run(
                 (
@@ -753,7 +783,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
+                    f"cd {dest_dir} && find /tmp/PKGBUILD_patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
                 ),
                 check=True,
             )
@@ -794,6 +824,38 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 check=True,
             )
 
+        if "SOURCE_patches_dir" in entry:
+            # Prepare first to populate sources for patching
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"cd {dest_dir} && makepkg -s --nobuild --noconfirm",
+                ),
+                check=True,
+                text=True,
+            )
+            patch_dir = pathlib.PosixPath(entry["SOURCE_patches_dir"])
+            if (
+                rsync_dir_to_dest(
+                    patch_dir, "/tmp/SOURCE_patches/", shared_state
+                )
+                != 0
+            ):
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"cd {dest_dir} && source ./PKGBUILD && cd src/${{pkgdir:-{name}}} && find /tmp/SOURCE_patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
+                ),
+                check=True,
+            )
+
         nowstring = get_datetime_now()
         logs_dir_path = pathlib.PosixPath(shared_state["toml"]["logs_dir"])
         with logs_dir_path.joinpath(
@@ -811,7 +873,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"cd {dest_dir} && makepkg -c -s --noconfirm",
+                    f"cd {dest_dir} && makepkg -s --noconfirm",
                 ),
                 text=True,
                 stdout=subprocess.PIPE,
@@ -918,7 +980,12 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     try:
         if "PKGBUILD_patches_dir" in entry:
             patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
-            if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
+            if (
+                rsync_dir_to_dest(
+                    patch_dir, "/tmp/PKGBUILD_patches/", shared_state
+                )
+                != 0
+            ):
                 return 1
             subprocess.run(
                 (
@@ -926,7 +993,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"cd {dest_dir} && find /tmp/patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
+                    f"cd {dest_dir} && find /tmp/PKGBUILD_patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
                 ),
                 check=True,
             )

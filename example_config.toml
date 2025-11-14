@@ -661,6 +661,7 @@ only_check_PKGBUILD = true
 other_deps = [
     "rapidjson"
 ]
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/tenacity_PKGBUILD"
 
 [[entry]]
 name = "wlhangul-git"
