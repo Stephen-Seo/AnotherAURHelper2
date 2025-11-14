@@ -19,7 +19,6 @@
 import argparse
 import datetime
 import getpass
-import os
 import pathlib
 import re
 import subprocess
@@ -1165,7 +1164,7 @@ def get_aur_deps(entry: dict, shared_state: dict) -> list[pathlib.PosixPath]:
         aur_dep_regex = re.compile(f"""^{aur_dep}-([0-9].*)$""")
         aur_dep_names = list(
             filter(
-                lambda p: p.find(name) != -1
+                lambda p: p.find(aur_dep) != -1
                 and p.find("/") == -1
                 and aur_dep_regex.fullmatch(p) is not None,
                 repo_names,
@@ -1338,7 +1337,7 @@ def main():
             log_print(repr(sys.exception()))
             return
 
-    log_print("Preload signing gpg key?")
+    log_print("Preload signing gpg key credentials?")
     user_result = user_interact_alpha(
         "Preload GPG key pass?", ["Yes, preload", "Skip"], True, shared_state
     )
