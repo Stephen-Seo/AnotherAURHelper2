@@ -81,6 +81,9 @@ and be able to use sudo.
 Test that you actually have access to the network by installing a package or
 using curl.
 
+Enable [multilib] by editing /etc/pacman.conf and doing a quick `pacman -Syu` in
+the container.
+
 Stop the container before the next step:
 Add the following text snippet to /etc/systemd/nspawn/aurbuild.nspawn :
 
