@@ -681,7 +681,7 @@ def start_container(shared_state: dict) -> int:
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        time.sleep(0.5)
+        time.sleep(3)
         subprocess.run(
             ("/usr/bin/sudo", "machinectl", "start", container), check=True
         )
@@ -942,6 +942,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
+        time.sleep(3)
     except:
         log_print(f"""ERROR: Failed to build "{name}"!""")
         log_print(repr(sys.exception()))
