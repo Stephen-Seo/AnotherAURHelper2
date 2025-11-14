@@ -55,13 +55,6 @@ skip_branch_up_to_date = true
 only_check_SRCINFO = true
 
 [[entry]]
-name = "g810-led"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "g810-led"
-skip_branch_up_to_date = true
-only_check_SRCINFO = true
-
-[[entry]]
 name = "gdk-pixbuf2-noglycin"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "gdk-pixbuf2-noglycin"
