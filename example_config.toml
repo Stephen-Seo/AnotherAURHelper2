@@ -664,6 +664,9 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "tenacity-git"
 hash_compare_PKGBUILD = true
 only_check_PKGBUILD = true
+other_deps = [
+    "rapidjson"
+]
 
 [[entry]]
 name = "wlhangul-git"
@@ -671,4 +674,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "wlhangul-git"
 hash_compare_PKGBUILD = true
 only_check_PKGBUILD = true
+other_deps = [
+    "wayland-protocols"
+]
 
