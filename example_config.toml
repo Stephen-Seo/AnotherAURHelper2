@@ -507,6 +507,7 @@ name = "nginx-mainline-mod-fancyindex"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "nginx-mainline-mod-fancyindex"
 skip_branch_up_to_date = false
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/nginx_fancy_index_PKGBUILD"
 
 [[entry]]
 name = "ungoogled-chromium-archlinux"
