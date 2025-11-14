@@ -532,6 +532,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
     user = shared_state["toml"]["container_user"]
+    checking_gpg_dir = pathlib.PosixPath(shared_state["toml"]["checking_gpg_dir"])
     other_deps = entry["other_deps"] if "other_deps" in entry else list()
     aur_deps = get_aur_deps(entry, shared_state)
     try:
@@ -555,6 +556,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                 ),
                 check=True,
             )
+        aur_dep_str = ""
         for aur_dep in aur_deps:
             dest = pathlib.PosixPath("/tmp")
             dest = dest / aur_dep.name
@@ -563,13 +565,18 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                     f'ERROR: Failed to send aur_dep "{aur_dep.name}" to chroot!'
                 )
                 return 1
+            if len(aur_dep_str) == 0:
+                aur_dep_str = dest.as_posix()
+            else:
+                aur_dep_str = aur_dep_str + " " + dest.as_posix()
+        if len(aur_dep_str) != 0:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"sudo pacman --noconfirm -U {dest.as_posix()}",
+                    f"sudo pacman --noconfirm -U {aur_dep_str}",
                 ),
                 check=True,
             )
@@ -810,6 +817,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 ),
                 check=True,
             )
+        aur_dep_str = ""
         for aur_dep in aur_deps:
             dest = pathlib.PosixPath("/tmp")
             dest = dest / aur_dep.name
@@ -818,13 +826,18 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     f'ERROR: Failed to send aur_dep "{aur_dep.name}" to chroot!'
                 )
                 return 1
+            if len(aur_dep_str) == 0:
+                aur_dep_str = dest.as_posix()
+            else:
+                aur_dep_str = aur_dep_str + " " + dest.as_posix()
+        if len(aur_dep_str) != 0:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"sudo pacman --noconfirm -U {dest.as_posix()}",
+                    f"sudo pacman --noconfirm -U {aur_dep_str}",
                 ),
                 check=True,
             )
@@ -1020,6 +1033,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                 ),
                 check=True,
             )
+        aur_dep_str = ""
         for aur_dep in aur_deps:
             dest = pathlib.PosixPath("/tmp")
             dest = dest / aur_dep.name
@@ -1028,13 +1042,18 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                     f'ERROR: Failed to send aur_dep "{aur_dep.name}" to chroot!'
                 )
                 return 1
+            if len(aur_dep_str) == 0:
+                aur_dep_str = dest.as_posix()
+            else:
+                aur_dep_str = aur_dep_str + " " + dest.as_posix()
+        if len(aur_dep_str) != 0:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"sudo pacman --noconfirm -U {dest.as_posix()}",
+                    f"sudo pacman --noconfirm -U {aur_dep_str}",
                 ),
                 check=True,
             )
