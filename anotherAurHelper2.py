@@ -1562,6 +1562,11 @@ def main():
                 idx += 1
                 shared_state["skipped"].add(entry["name"])
                 continue
+            elif args.force:
+                idx += 1
+                shared_state["confirmed"].add(entry["name"])
+                shared_state["pending_pkgs"].add(entry["name"])
+                continue
         elif args.force:
             idx += 1
             shared_state["confirmed"].add(entry["name"])
