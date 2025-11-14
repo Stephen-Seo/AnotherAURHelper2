@@ -532,7 +532,6 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
     user = shared_state["toml"]["container_user"]
-    checking_gpg_dir = pathlib.PosixPath(shared_state["toml"]["checking_gpg_dir"])
     other_deps = entry["other_deps"] if "other_deps" in entry else list()
     aur_deps = get_aur_deps(entry, shared_state)
     try:
@@ -609,6 +608,10 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                 check=True,
             )
 
+        checking_gpg_dir = rsync_checking_gpg(shared_state)
+        if len(checking_gpg_dir) == 0:
+            return 1
+
         time.sleep(0.3)
         subprocess.run(
             (
@@ -616,7 +619,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                 "-i",
                 id_file,
                 f"{user}@{c_addr}",
-                f"cd {dest_dir} && makepkg -s --nobuild --noconfirm",
+                f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" makepkg -s --nobuild --noconfirm',
             ),
             check=True,
             text=True,
@@ -842,6 +845,10 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 check=True,
             )
 
+        checking_gpg_dir = rsync_checking_gpg(shared_state)
+        if len(checking_gpg_dir) == 0:
+            return 1
+
         if "SOURCE_patches_dir" in entry:
             # Prepare first to populate sources for patching
             subprocess.run(
@@ -850,7 +857,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"cd {dest_dir} && makepkg -s --nobuild --noconfirm",
+                    f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" makepkg -s --nobuild --noconfirm',
                 ),
                 check=True,
                 text=True,
@@ -891,7 +898,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"cd {dest_dir} && makepkg -s --noconfirm",
+                    f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" makepkg -s --noconfirm',
                 ),
                 text=True,
                 stdout=subprocess.PIPE,
@@ -1058,13 +1065,17 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                 check=True,
             )
 
+        checking_gpg_dir = rsync_checking_gpg(shared_state)
+        if len(checking_gpg_dir) == 0:
+            return 1
+
         run_ret = subprocess.run(
             (
                 "/usr/bin/ssh",
                 "-i",
                 id_file,
                 f"{user}@{c_addr}",
-                f'cd {dest_dir} && makepkg -c -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
+                f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" makepkg -c -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
             ),
             check=True,
             text=True,
@@ -1349,6 +1360,39 @@ def print_pkg_status(shared_state: dict):
     log_print("Built Pkgs:")
     for pkg in shared_state["built_pkgs"]:
         log_print(f"  {pkg}")
+
+
+def rsync_checking_gpg(shared_state: dict) -> str:
+    """Returns the path to the checking gpg dir in the chroot."""
+    user = shared_state["toml"]["container_user"]
+    c_addr = shared_state["toml"]["container_addr"]
+    id_file = shared_state["toml"]["container_identity_file"]
+    checking_gpg_dir = shared_state["toml"]["checking_gpg_dir"]
+    if shared_state["toml"]["build_in_tmpfs"]:
+        dest_dir = "/tmp/checking_gpg"
+    else:
+        dest_dir = f"/home/{user}/checking_gpg"
+    full_dest_dir = f"{user}@{c_addr}:{dest_dir}/"
+    try:
+        subprocess.run(
+            (
+                "/usr/bin/rsync",
+                "-e",
+                f"ssh -i {id_file}",
+                "-rivt",
+                "--chmod=D700,F600",
+                checking_gpg_dir + "/",
+                full_dest_dir,
+            ),
+            check=True,
+        )
+    except:
+        log_print(
+            f'ERROR: Failed to rsync/send "{dir_path.as_posix()}" -> "{dest}" directory!'
+        )
+        log_print(repr(sys.exception()))
+        return ""
+    return dest_dir
 
 
 def main():
