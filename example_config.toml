@@ -318,8 +318,8 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mingw-w64-libsodium"
 aur_deps = [
     "mingw-w64-environment",
-    "mingw-w64-configure",
-    "mingw-w64-pkg-config"
+    "mingw-w64-pkg-config",
+    "mingw-w64-configure"
 ]
 skip_branch_up_to_date = true
 only_check_SRCINFO = true
