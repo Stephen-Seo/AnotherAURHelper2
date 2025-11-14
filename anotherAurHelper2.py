@@ -16,6 +16,7 @@
 # OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 # PERFORMANCE OF THIS SOFTWARE.
 
+import atexit
 import argparse
 import datetime
 import getpass
@@ -1247,6 +1248,18 @@ def rsync_dir_to_dest(
     return 0
 
 
+def print_pkg_status(shared_state: dict):
+    log_print("Pending Pkgs:")
+    for pkg in shared_state["pending_pkgs"]:
+        log_print(f"  {pkg}")
+    log_print("Failed Pkgs:")
+    for pkg in shared_state["failed_pkgs"]:
+        log_print(f"  {pkg}")
+    log_print("Built Pkgs:")
+    for pkg in shared_state["built_pkgs"]:
+        log_print(f"  {pkg}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="AnotherAURHelper2",
@@ -1272,10 +1285,15 @@ def main():
         return
     shared_state = dict()
     shared_state["toml"] = toml_d
+    shared_state["pending_pkgs"] = set()
+    shared_state["built_pkgs"] = set()
+    shared_state["failed_pkgs"] = set()
     global GLOBAL_TOML_D
     GLOBAL_TOML_D = toml_d
     global GLOBAL_SHARED_STATE
     GLOBAL_SHARED_STATE = shared_state
+
+    atexit.register(print_pkg_status, shared_state)
 
     log_print(
         "AnotherAURHelper2 will prompt for your password for sudo auth on this host machine.",
@@ -1402,6 +1420,7 @@ def main():
             elif args.force:
                 idx += 1
                 shared_state["confirmed"].add(entry["name"])
+                shared_state["pending_pkgs"].add(entry["name"])
                 continue
         elif args.skip is not None:
             if entry["name"] in args.skip:
@@ -1411,6 +1430,7 @@ def main():
         elif args.force:
             idx += 1
             shared_state["confirmed"].add(entry["name"])
+            shared_state["pending_pkgs"].add(entry["name"])
             continue
         log_print(f"Checking {entry['name']}...")
         if check_clone_package(entry, shared_state) == 0:
@@ -1425,6 +1445,7 @@ def main():
             return
         elif check_ret == 4:
             shared_state["confirmed"].add(entry["name"])
+            shared_state["pending_pkgs"].add(entry["name"])
             idx += 1
             continue
         elif check_ret != 0:
@@ -1451,6 +1472,7 @@ def main():
                 continue
             elif user_result == "Force build":
                 shared_state["confirmed"].add(entry["name"])
+                shared_state["pending_pkgs"].add(entry["name"])
                 idx += 1
                 continue
         user_result = user_interact_alpha(
@@ -1463,6 +1485,7 @@ def main():
             return
         elif user_result == "Force build":
             shared_state["confirmed"].add(entry["name"])
+            shared_state["pending_pkgs"].add(entry["name"])
             idx += 1
             continue
         elif user_result == "Retry":
@@ -1478,6 +1501,7 @@ def main():
         verif_ret = verify_to_build(entry, shared_state)
         if verif_ret == 0:
             shared_state["confirmed"].add(entry["name"])
+            shared_state["pending_pkgs"].add(entry["name"])
             log_print(f"Will build {entry['name']}")
         elif verif_ret == 1:
             shared_state["skipped"].add(entry["name"])
@@ -1530,11 +1554,17 @@ def main():
             build_ret = build_pkg(entry, shared_state)
             if build_ret != 0:
                 log_print(f"WARNING: Failed to build \"{entry['name']}\"!")
+                shared_state["failed_pkgs"].add(entry["name"])
+                shared_state["pending_pkgs"].remove(entry["name"])
                 continue
             ret = finalize_build(entry, shared_state)
             if ret != 0:
                 log_print(f"WARNING: Failed to finalize \"{entry['name']}\"!")
+                shared_state["failed_pkgs"].add(entry["name"])
+                shared_state["pending_pkgs"].remove(entry["name"])
                 continue
+            shared_state["built_pkgs"].add(entry["name"])
+            shared_state["pending_pkgs"].remove(entry["name"])
     log_print("Done.")
 
 
