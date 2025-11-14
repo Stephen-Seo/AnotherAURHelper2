@@ -1395,6 +1395,50 @@ def rsync_checking_gpg(shared_state: dict) -> str:
     return dest_dir
 
 
+def cleanup_packages(shared_state: dict, dry_run: bool) -> int:
+    """Returns 0 on success."""
+    pkgs_out_dir = pathlib.PosixPath(shared_state["toml"]["pkgs_out_dir"])
+    repo_name = shared_state["toml"]["aur_repo_name"]
+    repo_path = pkgs_out_dir / f"{repo_name}.db.tar"
+    try:
+        with tarfile.open(name=repo_path) as f:
+            repo_names = f.getnames()
+    except:
+        log_print(f'Failed to open "{repo_path}"!')
+        return 1
+    repo_names = set(filter(lambda n: n.find("/") == -1, repo_names))
+    pkgs = pkgs_out_dir.iterdir()
+    pkgs = set(
+        filter(
+            lambda p: p.name.find(".pkg.tar") != -1 and p.suffix != ".sig", pkgs
+        )
+    )
+    to_remove = set()
+    for pkg in pkgs:
+        found = False
+        for rname in repo_names:
+            if pkg.name.find(rname) != -1:
+                found = True
+                break
+        if not found:
+            to_remove.add(pkg)
+
+    # remove
+    for pkg in to_remove:
+        if dry_run:
+            log_print(f"Would remove pkg {pkg.name}...")
+        else:
+            log_print(f"Removing outdated pkg {pkg.name}...")
+            try:
+                pkg.unlink()
+                pathlib.PosixPath(pkg.as_posix() + ".sig").unlink()
+            except:
+                log_print(f"WARNING: Failed to remove pkg {pkg.name}!")
+                log_print(repr(sys.exception()))
+
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="AnotherAURHelper2",
@@ -1404,6 +1448,8 @@ def main():
     parser.add_argument("-p", "--pkg", action="append")
     parser.add_argument("--skip", action="append")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument("--cleanup", action="store_true")
+    parser.add_argument("--cleanup-dryrun", action="store_true")
     args = parser.parse_args()
 
     if args.config is None:
@@ -1427,6 +1473,13 @@ def main():
     GLOBAL_TOML_D = toml_d
     global GLOBAL_SHARED_STATE
     GLOBAL_SHARED_STATE = shared_state
+
+    if args.cleanup_dryrun:
+        cleanup_packages(shared_state, True)
+        return
+    if args.cleanup:
+        cleanup_packages(shared_state, False)
+        return
 
     atexit.register(print_pkg_status, shared_state)
 
