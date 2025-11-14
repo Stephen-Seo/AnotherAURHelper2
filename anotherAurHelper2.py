@@ -22,6 +22,7 @@ import datetime
 import getpass
 import pathlib
 import re
+import signal
 import subprocess
 import sys
 import tarfile
@@ -1362,6 +1363,11 @@ def print_pkg_status(shared_state: dict):
         log_print(f"  {pkg}")
 
 
+def handle_signal(sig, other):
+    if sig == signal.SIGUSR1:
+        print_pkg_status(GLOBAL_SHARED_STATE)
+
+
 def rsync_checking_gpg(shared_state: dict) -> str:
     """Returns the path to the checking gpg dir in the chroot."""
     user = shared_state["toml"]["container_user"]
@@ -1482,6 +1488,7 @@ def main():
         return
 
     atexit.register(print_pkg_status, shared_state)
+    signal.signal(signal.SIGUSR1, handle_signal)
 
     log_print(
         "AnotherAURHelper2 will prompt for your password for sudo auth on this host machine.",
