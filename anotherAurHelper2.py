@@ -476,8 +476,8 @@ def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
             check=True,
             cwd=clone_dir.as_posix(),
         )
-        if "patches_dir" in entry:
-            patches_path = pathlib.PosixPath(entry["patches_dir"])
+        if "PKGBUILD_patches_dir" in entry:
+            patches_path = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
             subprocess.run(
                 (
                     "/usr/bin/find",
@@ -582,8 +582,8 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
 
-        if "patches_dir" in entry:
-            patch_dir = pathlib.PosixPath(entry["patches_dir"])
+        if "PKGBUILD_patches_dir" in entry:
+            patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
             if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
                 return 1
             subprocess.run(
@@ -743,8 +743,8 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
 
-        if "patches_dir" in entry:
-            patch_dir = pathlib.PosixPath(entry["patches_dir"])
+        if "PKGBUILD_patches_dir" in entry:
+            patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
             if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
                 return 1
             subprocess.run(
@@ -916,8 +916,8 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     if rsync_package_to_container(entry, shared_state) != 0:
         return 2
     try:
-        if "patches_dir" in entry:
-            patch_dir = pathlib.PosixPath(entry["patches_dir"])
+        if "PKGBUILD_patches_dir" in entry:
+            patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
             if rsync_dir_to_dest(patch_dir, "/tmp/patches/", shared_state) != 0:
                 return 1
             subprocess.run(

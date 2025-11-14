@@ -97,7 +97,7 @@ name = "icecat"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "icecat"
 skip_branch_up_to_date = true
-patches_dir = "/home/stephen/Documents/aurbuild/patches/icecat"
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/icecat_PKGBUILD"
 
 [[entry]]
 name = "librewolf"
@@ -105,7 +105,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "librewolf"
 skip_branch_up_to_date = true
 only_check_SRCINFO = true
-patches_dir = "/home/stephen/Documents/aurbuild/patches/librewolf"
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/librewolf_PKGBUILD"
 
 [[entry]]
 name = "lib32-jemalloc"
@@ -156,7 +156,8 @@ only_check_SRCINFO = true
 name = "ncmpcpp"
 skip_branch_up_to_date = true
 repo_path = "https://gitlab.archlinux.org/archlinux/packaging/packages/ncmpcpp.git"
-patches_dir = "/home/stephen/Documents/aurbuild/patches/ncmpcpp"
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/ncmpcpp_PKGBUILD"
+SOURCE_patches_dir = "/home/stephen/Documents/aurbuild/patches/ncmpcpp_SOURCES"
 
 [[entry]]
 name = "nouveau-fw"
