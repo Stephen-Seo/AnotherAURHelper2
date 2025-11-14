@@ -1254,6 +1254,7 @@ def main():
     )
     parser.add_argument("-c", "--config")
     parser.add_argument("-p", "--pkg", action="append")
+    parser.add_argument("--skip", action="append")
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 
@@ -1401,6 +1402,11 @@ def main():
             elif args.force:
                 idx += 1
                 shared_state["confirmed"].add(entry["name"])
+                continue
+        elif args.skip is not None:
+            if entry["name"] in args.skip:
+                idx += 1
+                shared_state["skipped"].add(entry["name"])
                 continue
         elif args.force:
             idx += 1
