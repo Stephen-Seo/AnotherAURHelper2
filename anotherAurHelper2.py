@@ -645,7 +645,12 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         )
 
         subprocess.run(
-            ("/usr/bin/sudo", "machinectl", "poweroff", container), check=True
+            ("/usr/bin/sudo", "--stdin", "machinectl", "poweroff", container),
+            check=False,
+            text=True,
+            input=shared_state["pass"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
     except:
         log_print(f"""ERROR: Failed to run "prepare" on "{name}"'s PKGBUILD!""")
