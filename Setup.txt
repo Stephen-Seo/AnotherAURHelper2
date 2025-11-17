@@ -84,6 +84,15 @@ using curl.
 Enable [multilib] by editing /etc/pacman.conf and doing a quick `pacman -Syu` in
 the container.
 
+Ensure that the chroot systemd timeout time is short so that shutting down the
+container doesn't hang for the default 90 seconds (edit
+/etc/systemd/system.conf in the chroot):
+
+[Manager]
+...
+DefaultTimeoutStopSec=10s
+...
+
 Stop the container before the next step:
 Add the following text snippet to /etc/systemd/nspawn/aurbuild.nspawn :
 

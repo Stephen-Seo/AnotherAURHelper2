@@ -40,6 +40,7 @@ KNOWN_ARCHITECTURES = ("x86_64", "aarch64", "any")
 EPOCH_RE = re.compile("^([0-9]+):(.+)$")
 IS_DIGIT_REGEX = re.compile("^[0-9]+$")
 IS_PKG_REGEX = re.compile(r"^.*\.pkg\.tar\.([a-z]+)$")
+CONTAINER_WAIT_TIMEOUT = 20
 
 
 class ArchPkgVersion:
@@ -655,14 +656,9 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
             cwd=clone_dir.as_posix(),
         )
 
-        subprocess.run(
-            ("/usr/bin/sudo", "--stdin", "machinectl", "poweroff", container),
-            check=False,
-            text=True,
-            input=shared_state["pass"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        stop_ret = stop_container(shared_state)
+        if stop_ret != 0:
+            return 1
     except:
         log_print(f"""ERROR: Failed to run "prepare" on "{name}"'s PKGBUILD!""")
         log_print(repr(sys.exception()))
@@ -670,24 +666,80 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
     return 0
 
 
-def start_container(shared_state: dict) -> int:
+def stop_container(shared_state: dict) -> int:
     """Returns 0 on success."""
+    container = shared_state["toml"]["container_name"]
+    id_file = shared_state["toml"]["container_identity_file"]
+    user = shared_state["toml"]["container_user"]
+    c_addr = shared_state["toml"]["container_addr"]
+    subproc_ret = subprocess.run(
+        (
+            "/usr/bin/systemctl",
+            "is-active",
+            f"systemd-nspawn@{container}.service",
+        ),
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    if subproc_ret.stdout.strip() == "inactive":
+        return 0
+    elif subproc_ret.stdout.strip() != "active":
+        return 1
     try:
-        container = shared_state["toml"]["container_name"]
         subprocess.run(
             ("/usr/bin/sudo", "--stdin", "machinectl", "poweroff", container),
-            check=False,
-            input=shared_state["pass"].encode(),
+            check=True,
+            text=True,
+            input=shared_state["pass"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        time.sleep(3)
         subprocess.run(
-            ("/usr/bin/sudo", "machinectl", "start", container), check=True
+            f"while systemctl is-active systemd-nspawn@{container} | grep '^active'; do sleep 0.3; done",
+            check=True,
+            text=True,
+            shell=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=CONTAINER_WAIT_TIMEOUT,
         )
-        time.sleep(1)
+    except:
+        log_print("ERROR: Failed to stop container!")
+        log_print(repr(sys.exception()))
+        return 1
+    return 0
+
+
+def start_container(shared_state: dict) -> int:
+    """Returns 0 on success."""
+    container = shared_state["toml"]["container_name"]
+    container_addr = shared_state["toml"]["container_addr"]
+    stop_ret = stop_container(shared_state)
+    if stop_ret != 0:
+        log_print("ERROR: Failed to stop before starting container!")
+        return 1
+    try:
+        subprocess.run(
+            ("/usr/bin/sudo", "--stdin", "machinectl", "start", container),
+            check=True,
+            text=True,
+            input=shared_state["pass"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        subprocess.run(
+            f"while ping -c 1 -W 1 {container_addr}; do sleep 0.1; done",
+            check=True,
+            text=True,
+            shell=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=CONTAINER_WAIT_TIMEOUT,
+        )
     except:
         log_print("ERROR: Failed to start container!")
+        log_print(repr(sys.exception()))
         return 1
     return 0
 
@@ -934,15 +986,9 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         if rsync_package_from_container(entry, shared_state) != 0:
             return 1
 
-        subprocess.run(
-            ("/usr/bin/sudo", "--stdin", "machinectl", "poweroff", container),
-            check=True,
-            input=shared_state["pass"],
-            text=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        time.sleep(3)
+        stop_ret = stop_container(shared_state)
+        if stop_ret != 0:
+            return 1
     except:
         log_print(f"""ERROR: Failed to build "{name}"!""")
         log_print(repr(sys.exception()))
@@ -1654,28 +1700,37 @@ def main():
             shared_state["skipped"].add(entry["name"])
             idx += 1
             continue
-        if run_prepare_only(entry, shared_state) == 1:
-            log_print(f'"{entry['name']}" failed to prepare!')
-            user_result = user_interact_alpha(
-                "What to do?",
-                ["Skip", "Force build", "Abort"],
-                True,
-                shared_state,
-            )
-            if user_result == "Abort" or user_result == "interrupt":
-                return
-            elif user_result == "Skip":
-                log_print(
-                    f"""Skipping "{entry['name']}" due to failure to "prepare"..."""
+        do_continue = False
+        while True:
+            if run_prepare_only(entry, shared_state) == 1:
+                log_print(f'"{entry['name']}" failed to prepare!')
+                user_result = user_interact_alpha(
+                    "What to do?",
+                    ["Skip", "Retry", "Force build", "Abort"],
+                    True,
+                    shared_state,
                 )
-                shared_state["skipped"].add(entry["name"])
-                idx += 1
-                continue
-            elif user_result == "Force build":
-                shared_state["confirmed"].add(entry["name"])
-                shared_state["pending_pkgs"].add(entry["name"])
-                idx += 1
-                continue
+                if user_result == "Abort" or user_result == "interrupt":
+                    return
+                if user_result == "Retry":
+                    continue
+                elif user_result == "Skip":
+                    log_print(
+                        f"""Skipping "{entry['name']}" due to failure to "prepare"..."""
+                    )
+                    shared_state["skipped"].add(entry["name"])
+                    idx += 1
+                    do_continue = True
+                    break
+                elif user_result == "Force build":
+                    shared_state["confirmed"].add(entry["name"])
+                    shared_state["pending_pkgs"].add(entry["name"])
+                    idx += 1
+                    do_continue = True
+                    break
+            break
+        if do_continue:
+            continue
         user_result = user_interact_alpha(
             "OK with pkg?",
             ["OK", "Not OK", "Force build", "Retry"],
