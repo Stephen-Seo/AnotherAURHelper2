@@ -1044,7 +1044,7 @@ def get_pkgver(
     except:
         log_print(f'Failed to open "{repo_path}"!')
         return None
-    name_regex = re.compile(f"""^{name}-([0-9].*)$""")
+    name_regex = re.compile(f"""^{name}-(.*)$""")
     repo_names = list(
         filter(
             lambda p: p.find(name) != -1
@@ -1057,8 +1057,7 @@ def get_pkgver(
         log_print(f"{name} not in {repo_name}.db.tar!")
         return None
     elif len(repo_names) > 1:
-        log_print(f"Duplicate {name} entries in {repo_name}.db.tar!")
-        return None
+        log_print(f"WARNING: Duplicate {name} entries in {repo_name}.db.tar!")
     match = name_regex.fullmatch(repo_names[0])
     return ArchPkgVersion(match.group(1))
 
