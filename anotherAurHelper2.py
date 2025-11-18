@@ -1638,7 +1638,7 @@ def main():
         "Preload GPG key pass?", ["Yes, preload", "Skip"], True, shared_state
     )
     if user_result == "Yes, preload":
-        log_print("pkill current user's gpg-agent before entering gpg pass?"
+        log_print("pkill current user's gpg-agent before entering gpg pass?")
         user_result = user_interact_alpha(
             "Use pkill?",
             ["Yes", "No"],
