@@ -20,9 +20,12 @@ import atexit
 import argparse
 import datetime
 import getpass
+import hashlib
+import os
 import pathlib
 import re
 import signal
+import sqlite3
 import subprocess
 import sys
 import tarfile
@@ -41,6 +44,14 @@ EPOCH_RE = re.compile("^([0-9]+):(.+)$")
 IS_DIGIT_REGEX = re.compile("^[0-9]+$")
 IS_PKG_REGEX = re.compile(r"^.*\.pkg\.tar\.([a-z]+)$")
 CONTAINER_WAIT_TIMEOUT = 20
+SQLITE_PKGBUILD_SCHEMA = (
+    "CREATE TABLE IF NOT EXISTS PkgbuildHash (PKG TEXT PRIMARY KEY, HASH TEXT)"
+)
+SQLITE_PKGBUILD_INIT = "INSERT INTO PkgbuildHash (PKG) VALUES (?)"
+SQLITE_PKGBUILD_UPDATE = "UPDATE PkgbuildHash SET HASH = ? WHERE PKG = ?"
+SQLITE_PKGBUILD_CHECK = (
+    "SELECT PKG FROM PkgbuildHash WHERE PKG = ? AND HASH = ?"
+)
 
 
 class ArchPkgVersion:
@@ -472,6 +483,8 @@ def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
     name = entry["name"]
     clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
     clone_dir = clones_dir / name
+    PKGBUILD_path = clone_dir / "PKGBUILD"
+    sqlitedb_path = shared_state["toml"]["database_path"]
     try:
         subprocess.run(
             ("/usr/bin/git", "restore", "."),
@@ -495,11 +508,27 @@ def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
                 check=True,
                 cwd=clone_dir.as_posix(),
             )
-        subprocess.run(
-            ("/usr/bin/env", shared_state["toml"]["editor"], "PKGBUILD"),
-            check=True,
-            cwd=clone_dir.as_posix(),
-        )
+
+        # Check if already approved: hash matches in db.
+        with PKGBUILD_path.open("rb") as r:
+            m = hashlib.sha256()
+            read_ret = r.read(4096)
+            while len(read_ret) != 0:
+                m.update(read_ret)
+                read_ret = r.read(4096)
+            h = m.hexdigest()
+        conn = sqlite3.connect(sqlitedb_path)
+        cur = conn.execute(SQLITE_PKGBUILD_CHECK, (name, h))
+
+        if len(cur.fetchall()) == 0:
+            subprocess.run(
+                ("/usr/bin/env", shared_state["toml"]["editor"], "PKGBUILD"),
+                check=True,
+                cwd=clone_dir.as_posix(),
+            )
+        else:
+            return 0
+
         subprocess.run(
             ("/usr/bin/git", "restore", "."),
             check=True,
@@ -507,6 +536,7 @@ def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
         )
     except:
         log_print(f"""ERROR: Failed to check "{name}"'s PKGBUILD!""")
+        log_print(repr(sys.exception()))
         return 1
     check = user_interact_alpha(
         "Is PKGBUILD OK?",
@@ -522,6 +552,9 @@ def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
         return 4
     elif check != "OK":
         return 2
+    if "hash_compare_PKGBUILD" in entry and entry["hash_compare_PKGBUILD"]:
+        conn.execute(SQLITE_PKGBUILD_UPDATE, (h, name))
+        conn.commit()
     return 0
 
 
@@ -1582,27 +1615,47 @@ def main():
     if user_result == "interrupt":
         return
     elif user_result == "Add to ssh-agent":
-        try:
-            subprocess.run(
-                (
-                    "/usr/bin/ssh-add",
-                    "-t",
-                    "8h",
-                    toml_d["container_identity_file"],
-                ),
-                check=True,
-                text=True,
-            )
-        except:
-            log_print("ERROR: Failed to add key to ssh-agent!")
-            log_print(repr(sys.exception()))
-            return
+        not_success = True
+        while not_success:
+            try:
+                subprocess.run(
+                    (
+                        "/usr/bin/ssh-add",
+                        "-t",
+                        "8h",
+                        toml_d["container_identity_file"],
+                    ),
+                    check=True,
+                    text=True,
+                )
+                not_success = False
+            except:
+                log_print("ERROR: Failed to add key to ssh-agent!")
+                log_print(repr(sys.exception()))
 
     log_print("Preload signing gpg key credentials?")
     user_result = user_interact_alpha(
         "Preload GPG key pass?", ["Yes, preload", "Skip"], True, shared_state
     )
     if user_result == "Yes, preload":
+        log_print("pkill current user's gpg-agent before entering gpg pass?"
+        user_result = user_interact_alpha(
+            "Use pkill?",
+            ["Yes", "No"],
+            True,
+            shared_state,
+        )
+        if user_result == "Yes":
+            subprocess.run(
+                (
+                    "/usr/bin/pkill",
+                    "-u",
+                    os.environ["USER"],
+                    "-x",
+                    "gpg-agent",
+                ),
+                check=False,
+            )
         shared_state["sign_gpg_pass"] = getpass.getpass(
             prompt="signing gpg password: "
         )
@@ -1616,37 +1669,53 @@ def main():
             "Test file to sign with gpg to confirm the credentials are correct."
         )
 
-        try:
-            subprocess.run(
-                (
-                    "gpg",
-                    "--batch",
-                    "--passphrase-fd",
-                    "0",
-                    "--pinentry-mode",
-                    "loopback",
-                    "--default-key",
-                    toml_d["signing_gpg_fingerprint"],
-                    "--detach-sign",
-                    test_file_p.as_posix(),
-                ),
-                check=True,
-                text=True,
-                input=shared_state["sign_gpg_pass"],
-                env={"GNUPGHOME": toml_d["signing_gpg_dir"]},
-            )
-        except:
-            log_print("ERROR: Failed to sign test_file!")
-            log_print(repr(sys.exception()))
-            test_file_p.unlink()
-            (test_file_p_base / (test_file_name + ".sig")).unlink(
-                missing_ok=True
-            )
-            return
+        not_success = True
+        while not_success:
+            try:
+                subprocess.run(
+                    (
+                        "/usr/bin/gpg",
+                        "--batch",
+                        "--passphrase-fd",
+                        "0",
+                        "--pinentry-mode",
+                        "loopback",
+                        "--default-key",
+                        toml_d["signing_gpg_fingerprint"],
+                        "--detach-sign",
+                        test_file_p.as_posix(),
+                    ),
+                    check=True,
+                    text=True,
+                    input=shared_state["sign_gpg_pass"],
+                    env={"GNUPGHOME": toml_d["signing_gpg_dir"]},
+                )
+                not_success = False
+            except:
+                log_print("ERROR: Failed to sign test_file!")
+                log_print(repr(sys.exception()))
+                test_file_p.unlink(missing_ok=True)
+                (test_file_p_base / (test_file_name + ".sig")).unlink(
+                    missing_ok=True
+                )
         test_file_p.unlink()
         (test_file_p_base / (test_file_name + ".sig")).unlink()
     elif user_result == "interrupt":
         return
+
+    # Prepare sqlitedb if first time using it.
+    sqlite_conn = sqlite3.connect(toml_d["database_path"])
+    sqlite_conn.execute(SQLITE_PKGBUILD_SCHEMA)
+    for idx in range(len(toml_d["entry"])):
+        try:
+            sqlite_conn.execute(
+                SQLITE_PKGBUILD_INIT, (toml_d["entry"][idx]["name"],)
+            )
+        except:
+            # Just ensure entries exist, doesn't matter if they already do.
+            pass
+    sqlite_conn.commit()
+    sqlite_conn.close()
 
     log_print("Begin checking each package...")
     shared_state["skipped"] = set()
