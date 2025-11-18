@@ -578,6 +578,7 @@ repo_path = "https://github.com/ungoogled-software/ungoogled-chromium-archlinux.
 pkg_name = "ungoogled-chromium"
 ccache_dir = "/home/aur2/ccache_dirs/ungoogled_chromium"
 hash_compare_PKGBUILD = true
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/ungoogled_PKGBUILD"
 
 [[entry]]
 name = "cpufetch-git"
