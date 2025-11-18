@@ -1695,12 +1695,10 @@ def main():
             except:
                 log_print("ERROR: Failed to sign test_file!")
                 log_print(repr(sys.exception()))
-                test_file_p.unlink(missing_ok=True)
-                (test_file_p_base / (test_file_name + ".sig")).unlink(
-                    missing_ok=True
-                )
-        test_file_p.unlink()
-        (test_file_p_base / (test_file_name + ".sig")).unlink()
+        test_file_p.unlink(missing_ok=True)
+        (test_file_p_base / (test_file_name + ".sig")).unlink(
+            missing_ok=True
+        )
     elif user_result == "interrupt":
         return
 
