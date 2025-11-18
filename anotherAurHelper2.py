@@ -675,7 +675,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"cd {dest_dir} && source ./PKGBUILD && cd src/${{pkgname:-{name}}} && find /tmp/SOURCE_patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
+                    f"cd {dest_dir}/src && find /tmp/SOURCE_patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
                 ),
                 check=True,
             )
@@ -962,7 +962,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"cd {dest_dir} && source ./PKGBUILD && cd src/${{pkgdir:-{name}}} && find /tmp/SOURCE_patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
+                    f"cd {dest_dir}/src && find /tmp/SOURCE_patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
                 ),
                 check=True,
             )
