@@ -519,21 +519,22 @@ def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
             h = m.hexdigest()
         conn = sqlite3.connect(sqlitedb_path)
         cur = conn.execute(SQLITE_PKGBUILD_CHECK, (name, h))
-
-        if len(cur.fetchall()) == 0:
+        row_count = len(cur.fetchall())
+        if row_count == 0:
             subprocess.run(
                 ("/usr/bin/env", shared_state["toml"]["editor"], "PKGBUILD"),
                 check=True,
                 cwd=clone_dir.as_posix(),
             )
-        else:
-            return 0
 
         subprocess.run(
             ("/usr/bin/git", "restore", "."),
             check=True,
             cwd=clone_dir.as_posix(),
         )
+
+        if row_count != 0:
+            return 0
     except:
         log_print(f"""ERROR: Failed to check "{name}"'s PKGBUILD!""")
         log_print(repr(sys.exception()))
