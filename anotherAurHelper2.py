@@ -1657,9 +1657,6 @@ def main():
                 ),
                 check=False,
             )
-        shared_state["sign_gpg_pass"] = getpass.getpass(
-            prompt="signing gpg password: "
-        )
         test_file_name = "test_file_gpg_signing"
         test_file_p_base = pathlib.PosixPath("/tmp")
         test_file_p = test_file_p_base / test_file_name
@@ -1672,6 +1669,9 @@ def main():
 
         not_success = True
         while not_success:
+            shared_state["sign_gpg_pass"] = getpass.getpass(
+                prompt="signing gpg password: "
+            )
             try:
                 subprocess.run(
                     (
