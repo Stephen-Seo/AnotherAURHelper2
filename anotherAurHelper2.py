@@ -1433,6 +1433,9 @@ def rsync_dir_to_dest(
 
 
 def print_pkg_status(shared_state: dict):
+    log_print("Skipped Pkgs (usually up-to-date):")
+    for pkg in shared_state["skipped"]:
+        log_print(f"  {pkg}")
     log_print("Pending Pkgs:")
     for pkg in shared_state["pending_pkgs"]:
         log_print(f"  {pkg}")
