@@ -1660,20 +1660,20 @@ def main():
                 ),
                 check=False,
             )
-        test_file_name = "test_file_gpg_signing"
-        test_file_p_base = pathlib.PosixPath("/tmp")
-        test_file_p = test_file_p_base / test_file_name
-        while test_file_p.exists():
-            test_file_name += "_"
-            test_file_p = test_file_p_base / test_file_name
-        test_file_p.write_text(
-            "Test file to sign with gpg to confirm the credentials are correct."
-        )
 
         not_success = True
         while not_success:
             shared_state["sign_gpg_pass"] = getpass.getpass(
                 prompt="signing gpg password: "
+            )
+            test_file_name = "test_file_gpg_signing"
+            test_file_p_base = pathlib.PosixPath("/tmp")
+            test_file_p = test_file_p_base / test_file_name
+            while test_file_p.exists():
+                test_file_name += "_"
+                test_file_p = test_file_p_base / test_file_name
+            test_file_p.write_text(
+                "Test file to sign with gpg to confirm the credentials are correct."
             )
             try:
                 subprocess.run(
@@ -1698,6 +1698,10 @@ def main():
             except:
                 log_print("ERROR: Failed to sign test_file!")
                 log_print(repr(sys.exception()))
+                test_file_p.unlink(missing_ok=True)
+                (test_file_p_base / (test_file_name + ".sig")).unlink(
+                    missing_ok=True
+                )
         test_file_p.unlink(missing_ok=True)
         (test_file_p_base / (test_file_name + ".sig")).unlink(
             missing_ok=True
