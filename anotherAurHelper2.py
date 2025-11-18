@@ -1802,6 +1802,7 @@ def main():
             break
         if do_continue:
             continue
+        log_print(f"OK with pkg {entry["name"]}?")
         user_result = user_interact_alpha(
             "OK with pkg?",
             ["OK", "Not OK", "Force build", "Retry"],
