@@ -975,7 +975,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f'cd {dest_dir} && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
+                    f'cd {dest_dir} && makepkg -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
                 ),
                 check=True,
                 text=True,
@@ -1526,20 +1526,24 @@ def rsync_dir_to_dest(
 def print_pkg_status(shared_state: dict):
     if "skipped" in shared_state:
         log_print("Skipped Pkgs (usually up-to-date):")
-        for pkg in shared_state["skipped"]:
-            log_print(f"  {pkg}")
+        for entry in shared_state["toml"]["entry"]:
+            if entry["name"] in shared_state["skipped"]:
+                log_print(f"  {entry["name"]}")
     if "pending_pkgs" in shared_state:
         log_print("Pending Pkgs:")
-        for pkg in shared_state["pending_pkgs"]:
-            log_print(f"  {pkg}")
+        for entry in shared_state["toml"]["entry"]:
+            if entry["name"] in shared_state["pending_pkgs"]:
+                log_print(f"  {entry["name"]}")
     if "failed_pkgs" in shared_state:
         log_print("Failed Pkgs:")
-        for pkg in shared_state["failed_pkgs"]:
-            log_print(f"  {pkg}")
+        for entry in shared_state["toml"]["entry"]:
+            if entry["name"] in shared_state["failed_pkgs"]:
+                log_print(f"  {entry["name"]}")
     if "built_pkgs" in shared_state:
         log_print("Built Pkgs:")
-        for pkg in shared_state["built_pkgs"]:
-            log_print(f"  {pkg}")
+        for entry in shared_state["toml"]["entry"]:
+            if entry["name"] in shared_state["built_pkgs"]:
+                log_print(f"  {entry["name"]}")
 
 
 def handle_signal(sig, other):
