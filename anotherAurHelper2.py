@@ -1041,25 +1041,34 @@ def get_pkgver(
     try:
         with tarfile.open(name=repo_path) as f:
             repo_names = f.getnames()
+            name_regex = re.compile(f"""^{name}-(.*)$""")
+            repo_names = list(
+                filter(
+                    lambda p: p.find(name) != -1
+                    and p.find("/desc") != -1
+                    and name_regex.fullmatch(p) is not None,
+                    repo_names,
+                )
+            )
+            if len(repo_names) == 0:
+                log_print(f"{name} not in {repo_name}.db.tar!")
+                return None
+            elif len(repo_names) > 1:
+                log_print(
+                    f"WARNING: Duplicate {name} entries in {repo_name}.db.tar!"
+                )
+            ti = f.getmember(repo_names[0])
+            desc_f = f.extractfile(ti)
+            line = desc_f.readline()
+            while len(line) != 0:
+                if line.decode().strip() == "%VERSION%":
+                    line = desc_f.readline().decode().strip()
+                    return ArchPkgVersion(line)
+                line = desc_f.readline()
     except:
         log_print(f'Failed to open "{repo_path}"!')
         return None
-    name_regex = re.compile(f"""^{name}-(.*)$""")
-    repo_names = list(
-        filter(
-            lambda p: p.find(name) != -1
-            and p.find("/") == -1
-            and name_regex.fullmatch(p) is not None,
-            repo_names,
-        )
-    )
-    if len(repo_names) == 0:
-        log_print(f"{name} not in {repo_name}.db.tar!")
-        return None
-    elif len(repo_names) > 1:
-        log_print(f"WARNING: Duplicate {name} entries in {repo_name}.db.tar!")
-    match = name_regex.fullmatch(repo_names[0])
-    return ArchPkgVersion(match.group(1))
+    return None
 
 
 def verify_to_build(entry: dict, shared_state: dict) -> int:
@@ -1702,9 +1711,7 @@ def main():
                     missing_ok=True
                 )
         test_file_p.unlink(missing_ok=True)
-        (test_file_p_base / (test_file_name + ".sig")).unlink(
-            missing_ok=True
-        )
+        (test_file_p_base / (test_file_name + ".sig")).unlink(missing_ok=True)
     elif user_result == "interrupt":
         return
 
