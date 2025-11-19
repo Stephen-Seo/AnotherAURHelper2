@@ -852,6 +852,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
     clone_dir = clones_dir / name
     other_deps = entry["other_deps"] if "other_deps" in entry else list()
     aur_deps = get_aur_deps(entry, shared_state)
+    pkg_ver = get_pkgver(entry, shared_state)
     if shared_state["toml"]["build_in_tmpfs"]:
         dest_dir = f"/tmp/{name}"
     else:
@@ -965,6 +966,40 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 ),
                 check=True,
             )
+
+        if pkg_ver is not None:
+            # Check if pkgrel should be incremented.
+            run_ret = subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f'cd {dest_dir} && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
+                ),
+                check=True,
+                text=True,
+                capture_output=True,
+            )
+            PKGBUILD_ver = ArchPkgVersion(run_ret.stdout.strip())
+            if (
+                PKGBUILD_ver.versions == pkg_ver.versions
+                and PKGBUILD_ver.pkgrel <= pkg_ver.pkgrel
+            ):
+                new_pkgrel = pkg_ver.pkgrel + 1
+                log_print(
+                    f"NOTICE: Incrementing pkgrel in PKGBUILD for pkg {name} from {PKGBUILD_ver.pkgrel} to {new_pkgrel}..."
+                )
+                subprocess.run(
+                    (
+                        "/usr/bin/ssh",
+                        "-i",
+                        id_file,
+                        f"{user}@{c_addr}",
+                        f'cd {dest_dir} && sed -i -e "/^pkgrel/cpkgrel={new_pkgrel}" PKGBUILD',
+                    ),
+                    check=True,
+                )
 
         nowstring = get_datetime_now()
         logs_dir_path = pathlib.PosixPath(shared_state["toml"]["logs_dir"])
