@@ -41,6 +41,7 @@ GLOBAL_TOML_D = None
 GLOBAL_SHARED_STATE = None
 KNOWN_ARCHITECTURES = ("x86_64", "aarch64", "any")
 EPOCH_RE = re.compile("^([0-9]+):(.+)$")
+PKG_REL_RE = re.compile("^(.*)-([0-9]+)$")
 IS_DIGIT_REGEX = re.compile("^[0-9]+$")
 IS_PKG_REGEX = re.compile(r"^.*\.pkg\.tar\.([a-z]+)$")
 CONTAINER_WAIT_TIMEOUT = 20
@@ -59,19 +60,16 @@ class ArchPkgVersion:
 
     def __init__(self, version_str: str):
         self.versions = []
-        self.pkgver = 0
+        self.pkgrel = 1
         self.epoch = 0
         epoch_match = EPOCH_RE.match(version_str)
         if not epoch_match is None:
             self.epoch = int(epoch_match.group(1))
             version_str = epoch_match.group(2)
-        end_dash_idx = version_str.rfind("-")
-        if end_dash_idx != -1 and end_dash_idx + 1 < len(version_str):
-            try:
-                self.pkgver = int(version_str[end_dash_idx + 1 :])
-            except ValueError:
-                self.pkgver = version_str[end_dash_idx + 1 :]
-            version_str = version_str[:end_dash_idx]
+        pkgrel_match = PKG_REL_RE.match(version_str)
+        if not pkgrel_match is None:
+            version_str = pkgrel_match.group(1)
+            self.pkgrel = int(pkgrel_match.group(2))
 
         for sub in version_str.split("."):
             if IS_DIGIT_REGEX.match(sub) is not None:
@@ -172,16 +170,16 @@ class ArchPkgVersion:
             return 1
         else:
             try:
-                if self.pkgver < other_self.pkgver:
+                if self.pkgrel < other_self.pkgrel:
                     return -1
-                elif self.pkgver > other_self.pkgver:
+                elif self.pkgrel > other_self.pkgrel:
                     return 1
                 else:
                     return 0
             except TypeError:
-                if str(self.pkgver) < str(other_self.pkgver):
+                if str(self.pkgrel) < str(other_self.pkgrel):
                     return -1
-                elif str(self.pkgver) > str(other_self.pkgver):
+                elif str(self.pkgrel) > str(other_self.pkgrel):
                     return 1
                 else:
                     return 0
@@ -234,7 +232,7 @@ class ArchPkgVersion:
                 self_str += str(self.versions[idx])
             if idx + 1 < len(self.versions):
                 self_str += "."
-        self_str += "-" + str(self.pkgver)
+        self_str += "-" + str(self.pkgrel)
         return self_str
 
 
@@ -1081,6 +1079,9 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     aur_deps = get_aur_deps(entry, shared_state)
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
+    clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
+    clone_dir = clones_dir / name
+    SRCINFO_path = clone_dir / ".SRCINFO"
     if saved_pkgver is None:
         log_print(f"{name} has not been built; should be built")
         return 0
@@ -1089,101 +1090,135 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     else:
         dest_dir = name
 
-    start_container(shared_state)
-    if rsync_package_to_container(entry, shared_state) != 0:
-        return 2
-    try:
-        if "PKGBUILD_patches_dir" in entry:
-            patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
-            if (
-                rsync_dir_to_dest(
-                    patch_dir, "/tmp/PKGBUILD_patches/", shared_state
-                )
-                != 0
-            ):
-                return 1
-            subprocess.run(
-                (
-                    "/usr/bin/ssh",
-                    "-i",
-                    id_file,
-                    f"{user}@{c_addr}",
-                    f"cd {dest_dir} && find /tmp/PKGBUILD_patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
-                ),
-                check=True,
-            )
-
-        other_dep_str = ""
-        for other_dep in other_deps:
-            if len(other_dep_str) == 0:
-                other_dep_str = other_dep
-            else:
-                other_dep_str = other_dep_str + " " + other_dep
-        if len(other_dep_str) != 0:
-            subprocess.run(
-                (
-                    "/usr/bin/ssh",
-                    "-i",
-                    id_file,
-                    f"{user}@{c_addr}",
-                    f"sudo pacman --noconfirm -S {other_dep_str}",
-                ),
-                check=True,
-            )
-        aur_dep_str = ""
-        for aur_dep in aur_deps:
-            dest = pathlib.PosixPath("/tmp")
-            dest = dest / aur_dep.name
-            if rsync_file_to_dest(aur_dep, dest.as_posix(), shared_state) != 0:
-                log_print(
-                    f'ERROR: Failed to send aur_dep "{aur_dep.name}" to chroot!'
-                )
-                return 1
-            if len(aur_dep_str) == 0:
-                aur_dep_str = dest.as_posix()
-            else:
-                aur_dep_str = aur_dep_str + " " + dest.as_posix()
-        if len(aur_dep_str) != 0:
-            subprocess.run(
-                (
-                    "/usr/bin/ssh",
-                    "-i",
-                    id_file,
-                    f"{user}@{c_addr}",
-                    f"sudo pacman --noconfirm -U {aur_dep_str}",
-                ),
-                check=True,
-            )
-
-        checking_gpg_dir = rsync_checking_gpg(shared_state)
-        if len(checking_gpg_dir) == 0:
-            return 1
-
-        run_ret = subprocess.run(
-            (
-                "/usr/bin/ssh",
-                "-i",
-                id_file,
-                f"{user}@{c_addr}",
-                f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" makepkg -c -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
-            ),
-            check=True,
-            text=True,
-            capture_output=True,
+    if "only_check_SRCINFO" in entry and entry["only_check_SRCINFO"]:
+        SRCINFO_ver = None
+        SRCINFO_pkgver = None
+        SRCINFO_pkgrel = None
+        with SRCINFO_path.open() as srcinfo:
+            line = srcinfo.readline()
+            while len(line) != 0:
+                line = line.strip()
+                if len(line) != 0:
+                    tup = line.partition("=")
+                    if tup[0].strip() == "pkgver":
+                        SRCINFO_pkgver = tup[2].strip()
+                        if SRCINFO_pkgrel is not None:
+                            SRCINFO_ver = ArchPkgVersion(SRCINFO_pkgver + "-" + SRCINFO_pkgrel)
+                            break
+                    elif tup[0].strip() == "pkgrel":
+                        SRCINFO_pkgrel = tup[2].strip()
+                        if SRCINFO_pkgver is not None:
+                            SRCINFO_ver = ArchPkgVersion(SRCINFO_pkgver + "-" + SRCINFO_pkgrel)
+                            break
+                line = srcinfo.readline()
+        if SRCINFO_ver is None:
+            return 2
+        log_print(
+            f"{name}: SRCINFO: {str(SRCINFO_ver)}, saved: {str(saved_pkgver)}"
         )
-        # log_print("DEBUG: stdout is: " + run_ret.stdout.strip())
-        PKGBUILD_ver = ArchPkgVersion(run_ret.stdout.strip())
-    except:
-        log_print("ERROR: Failed to verify if entry should be built!")
-        log_print(repr(sys.exception()))
-        return 2
-    log_print(
-        f"{name}: PKGBUILD: {str(PKGBUILD_ver)}, saved: {str(saved_pkgver)}"
-    )
-    if PKGBUILD_ver > saved_pkgver:
-        return 0
+        if SRCINFO_ver > saved_pkgver:
+            return 0
+        else:
+            return 1
     else:
-        return 1
+        start_container(shared_state)
+        if rsync_package_to_container(entry, shared_state) != 0:
+            return 2
+        try:
+            if "PKGBUILD_patches_dir" in entry:
+                patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
+                if (
+                    rsync_dir_to_dest(
+                        patch_dir, "/tmp/PKGBUILD_patches/", shared_state
+                    )
+                    != 0
+                ):
+                    return 1
+                subprocess.run(
+                    (
+                        "/usr/bin/ssh",
+                        "-i",
+                        id_file,
+                        f"{user}@{c_addr}",
+                        f"cd {dest_dir} && find /tmp/PKGBUILD_patches/ -type f -exec sh -c 'patch -p1 < {{}}' ';'",
+                    ),
+                    check=True,
+                )
+
+            other_dep_str = ""
+            for other_dep in other_deps:
+                if len(other_dep_str) == 0:
+                    other_dep_str = other_dep
+                else:
+                    other_dep_str = other_dep_str + " " + other_dep
+            if len(other_dep_str) != 0:
+                subprocess.run(
+                    (
+                        "/usr/bin/ssh",
+                        "-i",
+                        id_file,
+                        f"{user}@{c_addr}",
+                        f"sudo pacman --noconfirm -S {other_dep_str}",
+                    ),
+                    check=True,
+                )
+            aur_dep_str = ""
+            for aur_dep in aur_deps:
+                dest = pathlib.PosixPath("/tmp")
+                dest = dest / aur_dep.name
+                if (
+                    rsync_file_to_dest(aur_dep, dest.as_posix(), shared_state)
+                    != 0
+                ):
+                    log_print(
+                        f'ERROR: Failed to send aur_dep "{aur_dep.name}" to chroot!'
+                    )
+                    return 1
+                if len(aur_dep_str) == 0:
+                    aur_dep_str = dest.as_posix()
+                else:
+                    aur_dep_str = aur_dep_str + " " + dest.as_posix()
+            if len(aur_dep_str) != 0:
+                subprocess.run(
+                    (
+                        "/usr/bin/ssh",
+                        "-i",
+                        id_file,
+                        f"{user}@{c_addr}",
+                        f"sudo pacman --noconfirm -U {aur_dep_str}",
+                    ),
+                    check=True,
+                )
+
+            checking_gpg_dir = rsync_checking_gpg(shared_state)
+            if len(checking_gpg_dir) == 0:
+                return 1
+
+            run_ret = subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" makepkg -c -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
+                ),
+                check=True,
+                text=True,
+                capture_output=True,
+            )
+            # log_print("DEBUG: stdout is: " + run_ret.stdout.strip())
+            PKGBUILD_ver = ArchPkgVersion(run_ret.stdout.strip())
+        except:
+            log_print("ERROR: Failed to verify if entry should be built!")
+            log_print(repr(sys.exception()))
+            return 2
+        log_print(
+            f"{name}: PKGBUILD: {str(PKGBUILD_ver)}, saved: {str(saved_pkgver)}"
+        )
+        if PKGBUILD_ver > saved_pkgver:
+            return 0
+        else:
+            return 1
 
 
 def enumerate_clone_dir(
@@ -1441,18 +1476,22 @@ def rsync_dir_to_dest(
 
 
 def print_pkg_status(shared_state: dict):
-    log_print("Skipped Pkgs (usually up-to-date):")
-    for pkg in shared_state["skipped"]:
-        log_print(f"  {pkg}")
-    log_print("Pending Pkgs:")
-    for pkg in shared_state["pending_pkgs"]:
-        log_print(f"  {pkg}")
-    log_print("Failed Pkgs:")
-    for pkg in shared_state["failed_pkgs"]:
-        log_print(f"  {pkg}")
-    log_print("Built Pkgs:")
-    for pkg in shared_state["built_pkgs"]:
-        log_print(f"  {pkg}")
+    if "skipped" in shared_state:
+        log_print("Skipped Pkgs (usually up-to-date):")
+        for pkg in shared_state["skipped"]:
+            log_print(f"  {pkg}")
+    if "pending_pkgs" in shared_state:
+        log_print("Pending Pkgs:")
+        for pkg in shared_state["pending_pkgs"]:
+            log_print(f"  {pkg}")
+    if "failed_pkgs" in shared_state:
+        log_print("Failed Pkgs:")
+        for pkg in shared_state["failed_pkgs"]:
+            log_print(f"  {pkg}")
+    if "built_pkgs" in shared_state:
+        log_print("Built Pkgs:")
+        for pkg in shared_state["built_pkgs"]:
+            log_print(f"  {pkg}")
 
 
 def handle_signal(sig, other):
