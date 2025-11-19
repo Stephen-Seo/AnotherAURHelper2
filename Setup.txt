@@ -26,6 +26,22 @@ Lines starting with "$" are commands to run in the chroot.
 The package arch-install-scripts is requried to create the chroot.
 
 --------------------------------------------------------------------------------
+    Important things to know
+--------------------------------------------------------------------------------
+
+By default, anotherAurHelper2.py causes heavy use of your pacman mirrors.
+Consider setting up a local private mirror so that you don't constantly
+download from a remote mirror (Check the arch wiki).
+https://wiki.archlinux.org/title/Package_proxy_cache
+
+If you don't have much RAM, then you probably should have:
+
+build_in_tmpfs = false
+
+...in your config. This option will fetch and build into RAM if enabled. Having
+at least 64GiB would be ideal.
+
+--------------------------------------------------------------------------------
     The Container
 --------------------------------------------------------------------------------
 
