@@ -7,4 +7,4 @@ Uses systemd-nspawn for the container instead of LXC as in the original
 
 ## Setup
 
-See Setup.txt .
+See [Setup.txt](https://github.com/Stephen-Seo/AnotherAURHelper2/blob/main/Setup.txt) .
