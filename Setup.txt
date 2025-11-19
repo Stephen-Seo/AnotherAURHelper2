@@ -78,6 +78,10 @@ You must also set up sshd and access to the container by the user. By the end of
 setting up the network and sshd, you should be able to ssh into the 'aur' user
 and be able to use sudo.
 
+See the configExamples/ directory for systemd service file examples for setting
+up ip addresses with the default networking setup. Note that this also requires
+setting up forwarding with the firewall.
+
 Test that you actually have access to the network by installing a package or
 using curl.
 

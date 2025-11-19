@@ -1,0 +1,16 @@
+# This systemd service file is in the HOST.
+[Unit]
+After=systemd-nspawn@aurbuild.service
+Requires=systemd-nspawn@aurbuild.service
+
+[Service]
+Type=oneshot
+# Change the ip address for your needs here.
+# Assumes the container is 10.5.0.2 and the host is 10.5.0.1 in this example.
+ExecStart=-/usr/bin/ip addr add 10.5.0.1/30 dev ve-aurbuild
+ExecStart=-/usr/bin/ip link set ve-aurbuild up
+ExecStart=/usr/bin/sysctl net.ipv4.ip_forward=1
+ExecStart=/usr/bin/sysctl net.ipv4.conf.ve-aurbuild.forwarding=1
+
+[Install]
+WantedBy=systemd-nspawn@aurbuild.service

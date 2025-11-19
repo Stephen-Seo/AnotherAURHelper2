@@ -1,0 +1,15 @@
+# This systemd service file is in the CONTAINER.
+[Unit]
+After=network.target
+Description=Setup Ip Addr and Route
+
+[Service]
+Type=oneshot
+# Change the ip address for your needs here.
+# Assumes the container is 10.5.0.2 and the host is 10.5.0.1 in this example.
+ExecStart=/usr/bin/ip addr add 10.5.0.2/30 dev host0
+ExecStart=/usr/bin/ip link set host0 up
+ExecStart=/usr/bin/ip route add default via 10.5.0.1 dev host0
+
+[Install]
+WantedBy=multi-user.target
