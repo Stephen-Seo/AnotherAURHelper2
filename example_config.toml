@@ -24,7 +24,6 @@ database_path = "/home/stephen/Documents/aurbuild/state.db"
 name = "aurutils"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "aurutils"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -32,7 +31,6 @@ hash_compare_PKGBUILD = true
 name = "bindfs"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "bindfs"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -40,7 +38,6 @@ hash_compare_PKGBUILD = true
 name = "curseforge"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "curseforge"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -48,7 +45,6 @@ hash_compare_PKGBUILD = true
 name = "f3"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "f3"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -56,7 +52,6 @@ hash_compare_PKGBUILD = true
 name = "festival-freebsoft-utils"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "festival-freebsoft-utils"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -64,7 +59,6 @@ hash_compare_PKGBUILD = true
 name = "gdk-pixbuf2-noglycin"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "gdk-pixbuf2-noglycin"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -72,7 +66,6 @@ hash_compare_PKGBUILD = true
 name = "gnome-icon-theme-symbolic"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "gnome-icon-theme-symbolic"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -83,7 +76,6 @@ repo_branch = "gnome-icon-theme"
 aur_deps = [
     "gnome-icon-theme-symbolic"
 ]
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -91,7 +83,6 @@ hash_compare_PKGBUILD = true
 name = "gromit-mpx"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "gromit-mpx"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -99,7 +90,6 @@ hash_compare_PKGBUILD = true
 name = "helm-synth"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "helm-synth"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -107,7 +97,6 @@ hash_compare_PKGBUILD = true
 name = "icecat"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "icecat"
-skip_branch_up_to_date = true
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/icecat_PKGBUILD"
 hash_compare_PKGBUILD = true
 
@@ -115,7 +104,6 @@ hash_compare_PKGBUILD = true
 name = "librewolf"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "librewolf"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/librewolf_PKGBUILD"
 hash_compare_PKGBUILD = true
@@ -124,7 +112,6 @@ hash_compare_PKGBUILD = true
 name = "lib32-jemalloc"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "lib32-jemalloc"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -132,7 +119,6 @@ hash_compare_PKGBUILD = true
 name = "librsvg-noglycin"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "librsvg-noglycin"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 aur_deps = [
     "gdk-pixbuf2-noglycin"
@@ -143,7 +129,6 @@ hash_compare_PKGBUILD = true
 name = "libtai"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "libtai"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -151,7 +136,6 @@ hash_compare_PKGBUILD = true
 name = "libtree"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "libtree"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -159,7 +143,6 @@ hash_compare_PKGBUILD = true
 name = "losslesscut-bin"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "losslesscut-bin"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -167,13 +150,11 @@ hash_compare_PKGBUILD = true
 name = "multitail"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "multitail"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
 [[entry]]
 name = "ncmpcpp"
-skip_branch_up_to_date = true
 repo_path = "https://gitlab.archlinux.org/archlinux/packaging/packages/ncmpcpp.git"
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/ncmpcpp_PKGBUILD"
 SOURCE_patches_dir = "/home/stephen/Documents/aurbuild/patches/ncmpcpp_SOURCES"
@@ -183,7 +164,6 @@ hash_compare_PKGBUILD = true
 name = "nouveau-fw"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "nouveau-fw"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -191,7 +171,6 @@ hash_compare_PKGBUILD = true
 name = "ncurses5-compat-libs"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "ncurses5-compat-libs"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -202,7 +181,6 @@ repo_branch = "opencl-amd"
 aur_deps = [
     "ncurses5-compat-libs"
 ]
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -210,7 +188,6 @@ hash_compare_PKGBUILD = true
 name = "epson-inkjet-printer-escpr"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "epson-inkjet-printer-escpr"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -218,7 +195,6 @@ hash_compare_PKGBUILD = true
 name = "epson-inkjet-printer-escpr2"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "epson-inkjet-printer-escpr2"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -226,7 +202,6 @@ hash_compare_PKGBUILD = true
 name = "google-chrome"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "google-chrome"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -234,7 +209,6 @@ hash_compare_PKGBUILD = true
 name = "libva-vdpau-driver-chromium"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "libva-vdpau-driver-chromium"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -242,7 +216,6 @@ hash_compare_PKGBUILD = true
 name = "mate-screensaver-hacks"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mate-screensaver-hacks"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -250,7 +223,6 @@ hash_compare_PKGBUILD = true
 name = "mcrcon"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mcrcon"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -258,7 +230,6 @@ hash_compare_PKGBUILD = true
 name = "minecraft-launcher"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "minecraft-launcher"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -266,7 +237,6 @@ hash_compare_PKGBUILD = true
 name = "mingw-w64-environment"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mingw-w64-environment"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -274,7 +244,6 @@ hash_compare_PKGBUILD = true
 name = "mingw-w64-glm"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mingw-w64-glm"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -282,7 +251,6 @@ hash_compare_PKGBUILD = true
 name = "mingw-w64-lua"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mingw-w64-lua"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -290,7 +258,6 @@ hash_compare_PKGBUILD = true
 name = "mingw-w64-pkg-config"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mingw-w64-pkg-config"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -302,7 +269,6 @@ aur_deps = [
     "mingw-w64-pkg-config",
     "mingw-w64-environment"
 ]
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -314,7 +280,6 @@ aur_deps = [
     "mingw-w64-pkg-config",
     "mingw-w64-environment"
 ]
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -322,7 +287,6 @@ hash_compare_PKGBUILD = true
 name = "mingw-w64-zlib"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mingw-w64-zlib"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -336,7 +300,6 @@ aur_deps = [
     "mingw-w64-configure",
     "mingw-w64-zlib"
 ]
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -347,7 +310,6 @@ repo_branch = "mingw-w64-make"
 aur_deps = [
     "mingw-w64-environment"
 ]
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -360,7 +322,6 @@ aur_deps = [
     "mingw-w64-pkg-config",
     "mingw-w64-configure"
 ]
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -373,7 +334,6 @@ aur_deps = [
     "mingw-w64-environment",
     "mingw-w64-cmake"
 ]
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -387,7 +347,6 @@ aur_deps = [
     "mingw-w64-cmake",
     "mingw-w64-glfw"
 ]
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -395,7 +354,6 @@ hash_compare_PKGBUILD = true
 name = "python-mingw-ldd"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "python-mingw-ldd"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -406,7 +364,6 @@ repo_branch = "mingw-w64-ldd"
 aur_deps = [
     "python-mingw-ldd"
 ]
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -414,7 +371,6 @@ hash_compare_PKGBUILD = true
 name = "modrinth-app"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "modrinth-app"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 full_link_cargo_registry = true
 hash_compare_PKGBUILD = true
@@ -423,7 +379,6 @@ hash_compare_PKGBUILD = true
 name = "modrinth-app-bin"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "modrinth-app-bin"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -431,7 +386,6 @@ hash_compare_PKGBUILD = true
 name = "moonscript"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "moonscript"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -439,7 +393,6 @@ hash_compare_PKGBUILD = true
 name = "nginx_passwd"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "nginx_passwd"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -447,7 +400,6 @@ hash_compare_PKGBUILD = true
 name = "pikaur"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "pikaur"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -455,7 +407,6 @@ hash_compare_PKGBUILD = true
 name = "plzip"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "plzip"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -463,7 +414,6 @@ hash_compare_PKGBUILD = true
 name = "tarlz"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "tarlz"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -471,7 +421,6 @@ hash_compare_PKGBUILD = true
 name = "qjoypad"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "qjoypad"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -479,7 +428,6 @@ hash_compare_PKGBUILD = true
 name = "rsgain"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "rsgain"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -487,7 +435,6 @@ hash_compare_PKGBUILD = true
 name = "samsung-unified-driver"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "samsung-unified-driver"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -495,7 +442,6 @@ hash_compare_PKGBUILD = true
 name = "simplearchiver"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "simplearchiver"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -503,7 +449,6 @@ hash_compare_PKGBUILD = true
 name = "simplescreenrecorder"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "simplescreenrecorder"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -511,7 +456,6 @@ hash_compare_PKGBUILD = true
 name = "stdman"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "stdman"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -519,7 +463,6 @@ hash_compare_PKGBUILD = true
 name = "sunvox"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "sunvox"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -527,7 +470,6 @@ hash_compare_PKGBUILD = true
 name = "texlive-tikz-uml"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "texlive-tikz-uml"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -535,7 +477,6 @@ hash_compare_PKGBUILD = true
 name = "ttf-clear-sans"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "ttf-clear-sans"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -543,7 +484,6 @@ hash_compare_PKGBUILD = true
 name = "umlet"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "umlet"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 
@@ -551,7 +491,6 @@ hash_compare_PKGBUILD = true
 name = "wlrobs"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "wlrobs"
-skip_branch_up_to_date = true
 only_check_SRCINFO = true
 aur_deps = [
     "obs-studio-git",
@@ -568,7 +507,6 @@ hash_compare_PKGBUILD = true
 name = "nginx-mainline-mod-fancyindex"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "nginx-mainline-mod-fancyindex"
-skip_branch_up_to_date = false
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/nginx_fancy_index_PKGBUILD"
 hash_compare_PKGBUILD = true
 
@@ -585,21 +523,18 @@ name = "cpufetch-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "cpufetch-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 
 [[entry]]
 name = "flamegraph-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "flamegraph-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 
 [[entry]]
 name = "glfw-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "glfw-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 
 [[entry]]
 name = "gnvim-git"
@@ -607,7 +542,6 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "gnvim-git"
 full_link_cargo_registry = true
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 
 [[entry]]
 name = "helix-git"
@@ -615,7 +549,6 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "helix-git"
 full_link_cargo_registry = true
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 
 [[entry]]
 name = "ion-git"
@@ -623,7 +556,6 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "ion-git"
 full_link_cargo_registry = true
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 
 [[entry]]
 name = "neovide-git"
@@ -631,14 +563,12 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "neovide-git"
 full_link_cargo_registry = true
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 
 [[entry]]
 name = "obs-studio-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "obs-studio-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 other_deps = [
     "pipewire-jack",
     "wireplumber"
@@ -649,7 +579,6 @@ name = "pasystray-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "pasystray-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 aur_deps = [
     "gnome-icon-theme",
     "gnome-icon-theme-symbolic"
@@ -660,7 +589,6 @@ name = "xorg-xwayland-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "xorg-xwayland-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 
 [[entry]]
 name = "wlroots-git"
@@ -672,7 +600,6 @@ aur_deps = [
 other_deps = [
     "libdisplay-info"
 ]
-only_check_PKGBUILD = true
 hash_compare_PKGBUILD = true
 
 [[entry]]
@@ -680,7 +607,6 @@ name = "swaybg-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "swaybg-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 
 [[entry]]
 name = "sway-git"
@@ -695,7 +621,6 @@ other_deps = [
     "mesa",
     "libdisplay-info"
 ]
-only_check_PKGBUILD = true
 hash_compare_PKGBUILD = true
 
 [[entry]]
@@ -703,21 +628,18 @@ name = "swaylock-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "swaylock-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 
 [[entry]]
 name = "swayidle-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "swayidle-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 
 [[entry]]
 name = "t-rec-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "t-rec-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 full_link_cargo_registry = true
 
 [[entry]]
@@ -725,7 +647,6 @@ name = "tenacity-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "tenacity-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 other_deps = [
     "rapidjson"
 ]
@@ -736,7 +657,6 @@ name = "wlhangul-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "wlhangul-git"
 hash_compare_PKGBUILD = true
-only_check_PKGBUILD = true
 other_deps = [
     "wayland-protocols"
 ]
