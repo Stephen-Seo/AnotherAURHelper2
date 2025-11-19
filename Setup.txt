@@ -34,6 +34,9 @@ Consider setting up a local private mirror so that you don't constantly
 download from a remote mirror (Check the arch wiki).
 https://wiki.archlinux.org/title/Package_proxy_cache
 
+Alternatively, follow the guide (in the latter end) to expose the host's pacman
+cache to the container.
+
 If you don't have much RAM, then you probably should have:
 
 build_in_tmpfs = false
@@ -131,3 +134,20 @@ inside of a btrfs subvolume, creation of the copy should be fast.
 Note that if you want to update the container, you must set "Ephemeral" to "off"
 and start the container afterwards for changes to persist. Don't forget to set
 it back to "on" after you've powered off the container with your changes.
+
+
+TO REDUCE PACMAN PKG DOWNLOADS THOUGH IT EXPOSES THE ROOT PKG CACHE TO CONTAINER
+
+Add to "/etc/systemd/nspawn/aurbuild.nspawn" :
+
+[Files]
+...
+Bind=/var/cache/pacman/pkg:/var/cache/pacman/pkg:owneridmap
+...
+
+Also, edit "/etc/pacman.conf" in the CONTAINER and comment out the following
+line:
+
+#DownloadUser = alpm
+
+These two changes will cause the container to use the host's pacman cache.
