@@ -1,5 +1,8 @@
 # AnotherAURHelper 2
 
+[Note that AnotherAURHelper (the first) exists and is probably superseded by
+this](https://github.com/Stephen-Seo/AnotherAURHelper)
+
 Builds AUR pkgs and stores them as a separate ArchLinux pacman repository.
 
 Uses systemd-nspawn for the container instead of LXC as in the original
