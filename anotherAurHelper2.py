@@ -1048,14 +1048,23 @@ def get_pkgver(
                     repo_names,
                 )
             )
+            repo_names_idx = 0
             if len(repo_names) == 0:
                 log_print(f"{name} not in {repo_name}.db.tar!")
                 return None
             elif len(repo_names) > 1:
-                log_print(
-                    f"WARNING: Duplicate {name} entries in {repo_name}.db.tar!"
-                )
-            ti = f.getmember(repo_names[0])
+                for idx in range(len(repo_names)):
+                    ti = f.getmember(repo_names[idx])
+                    desc_f = f.extractfile(ti)
+                    line = desc_f.readline()
+                    while len(line) != 0:
+                        if line.decode().strip() == "%NAME%":
+                            line = desc_f.readline()
+                            if line.decode().strip() == name:
+                                repo_names_idx = idx
+                                break
+                        line = desc_f.readline()
+            ti = f.getmember(repo_names[repo_names_idx])
             desc_f = f.extractfile(ti)
             line = desc_f.readline()
             while len(line) != 0:
@@ -1103,12 +1112,16 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                     if tup[0].strip() == "pkgver":
                         SRCINFO_pkgver = tup[2].strip()
                         if SRCINFO_pkgrel is not None:
-                            SRCINFO_ver = ArchPkgVersion(SRCINFO_pkgver + "-" + SRCINFO_pkgrel)
+                            SRCINFO_ver = ArchPkgVersion(
+                                SRCINFO_pkgver + "-" + SRCINFO_pkgrel
+                            )
                             break
                     elif tup[0].strip() == "pkgrel":
                         SRCINFO_pkgrel = tup[2].strip()
                         if SRCINFO_pkgver is not None:
-                            SRCINFO_ver = ArchPkgVersion(SRCINFO_pkgver + "-" + SRCINFO_pkgrel)
+                            SRCINFO_ver = ArchPkgVersion(
+                                SRCINFO_pkgver + "-" + SRCINFO_pkgrel
+                            )
                             break
                 line = srcinfo.readline()
         if SRCINFO_ver is None:
