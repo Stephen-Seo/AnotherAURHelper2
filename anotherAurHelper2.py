@@ -978,7 +978,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                         "-i",
                         id_file,
                         f"{user}@{c_addr}",
-                        f'cd {dest_dir} && makepkg -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
+                        f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" makepkg -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
                     ),
                     check=True,
                     text=True,
