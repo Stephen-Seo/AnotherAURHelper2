@@ -1092,13 +1092,17 @@ def get_pkgver(
                     ti = f.getmember(repo_names[idx])
                     desc_f = f.extractfile(ti)
                     line = desc_f.readline()
+                    name_found = False
                     while len(line) != 0:
                         if line.decode().strip() == "%NAME%":
                             line = desc_f.readline()
                             if line.decode().strip() == name:
                                 repo_names_idx = idx
-                                break
+                                name_found = True
+                            break
                         line = desc_f.readline()
+                    if name_found:
+                        break
             ti = f.getmember(repo_names[repo_names_idx])
             desc_f = f.extractfile(ti)
             line = desc_f.readline()
