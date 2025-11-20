@@ -935,6 +935,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         if len(checking_gpg_dir) == 0:
             return 1
 
+        no_prepare_str = ""
         if "SOURCE_patches_dir" in entry:
             # Prepare first to populate sources for patching
             subprocess.run(
@@ -966,21 +967,36 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 ),
                 check=True,
             )
+            no_prepare_str = "--noextract"
 
         if pkg_ver is not None:
             # Check if pkgrel should be incremented.
-            run_ret = subprocess.run(
-                (
-                    "/usr/bin/ssh",
-                    "-i",
-                    id_file,
-                    f"{user}@{c_addr}",
-                    f'cd {dest_dir} && makepkg -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
-                ),
-                check=True,
-                text=True,
-                capture_output=True,
-            )
+            if len(no_prepare_str) == 0:
+                run_ret = subprocess.run(
+                    (
+                        "/usr/bin/ssh",
+                        "-i",
+                        id_file,
+                        f"{user}@{c_addr}",
+                        f'cd {dest_dir} && makepkg -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
+                    ),
+                    check=True,
+                    text=True,
+                    capture_output=True,
+                )
+            else:
+                run_ret = subprocess.run(
+                    (
+                        "/usr/bin/ssh",
+                        "-i",
+                        id_file,
+                        f"{user}@{c_addr}",
+                        f'cd {dest_dir} && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
+                    ),
+                    check=True,
+                    text=True,
+                    capture_output=True,
+                )
             PKGBUILD_ver = ArchPkgVersion(run_ret.stdout.strip())
             if (
                 PKGBUILD_ver.versions == pkg_ver.versions
@@ -1018,7 +1034,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" makepkg -s --noconfirm',
+                    f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" makepkg -s --noconfirm {no_prepare_str}',
                 ),
                 text=True,
                 stdout=subprocess.PIPE,
