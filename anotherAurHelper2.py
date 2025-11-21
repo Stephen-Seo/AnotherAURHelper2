@@ -1177,6 +1177,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
         SRCINFO_ver = None
         SRCINFO_pkgver = None
         SRCINFO_pkgrel = None
+        SRCINFO_epoch = None
         with SRCINFO_path.open() as srcinfo:
             line = srcinfo.readline()
             while len(line) != 0:
@@ -1185,16 +1186,23 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                     tup = line.partition("=")
                     if tup[0].strip() == "pkgver":
                         SRCINFO_pkgver = tup[2].strip()
-                        if SRCINFO_pkgrel is not None:
+                        if SRCINFO_pkgrel is not None and SRCINFO_epoch is not None:
                             SRCINFO_ver = ArchPkgVersion(
-                                SRCINFO_pkgver + "-" + SRCINFO_pkgrel
+                                SRCINFO_epoch + ":" + SRCINFO_pkgver + "-" + SRCINFO_pkgrel
                             )
                             break
                     elif tup[0].strip() == "pkgrel":
                         SRCINFO_pkgrel = tup[2].strip()
-                        if SRCINFO_pkgver is not None:
+                        if SRCINFO_pkgver is not None and SRCINFO_epoch is not None:
                             SRCINFO_ver = ArchPkgVersion(
-                                SRCINFO_pkgver + "-" + SRCINFO_pkgrel
+                                SRCINFO_epoch + ":" + SRCINFO_pkgver + "-" + SRCINFO_pkgrel
+                            )
+                            break
+                    elif tup[0].strip() == "epoch":
+                        SRCINFO_epoch = tup[2].strip()
+                        if SRCINFO_pkgver is not None and SRCINFO_pkgrel is not None:
+                            SRCINFO_ver = ArchPkgVersion(
+                                SRCINFO_epoch + ":" + SRCINFO_pkgver + "-" + SRCINFO_pkgrel
                             )
                             break
                 line = srcinfo.readline()
