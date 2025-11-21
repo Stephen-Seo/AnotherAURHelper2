@@ -2011,7 +2011,7 @@ def main():
         if entry["name"] in shared_state["confirmed"]:
             log_print(f'  {entry["name"]}')
     if len(shared_state["confirmed"]) == 0:
-        log_print("Nothing to build, stopping.")
+        log_print("\nNothing to build, stopping.\n")
         return
     log_print("Continue?")
     user_result = user_interact_alpha(
