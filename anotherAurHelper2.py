@@ -315,13 +315,12 @@ def thread_handle_output_stream(
         if len(line) == 0:
             break
 
-        if print_to_log:
-            log_print(line.rstrip("\n"))
-
         if ignore_output_file:
             continue
 
         if not limit_reached:
+            if print_to_log:
+                log_print(line.rstrip())
             nowstring = get_datetime_now()
             line = nowstring + " " + line
             log_count += len(line)
