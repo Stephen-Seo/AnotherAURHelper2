@@ -659,6 +659,23 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
             text=True,
         )
 
+        # Prefetch PKGBUILD version
+        run_ret = subprocess.run(
+            (
+                "/usr/bin/ssh",
+                "-i",
+                id_file,
+                f"{user}@{c_addr}",
+                f'cd {dest_dir} && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
+            ),
+            check=True,
+            text=True,
+            capture_output=True,
+        )
+        shared_state["cached_PKGBUILD_ver"][name] = ArchPkgVersion(
+            run_ret.stdout.strip()
+        )
+
         if "SOURCE_patches_dir" in entry:
             patch_dir = pathlib.PosixPath(entry["SOURCE_patches_dir"])
             if (
@@ -1188,6 +1205,14 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
             return 0
         else:
             return 1
+    elif name in shared_state["cached_PKGBUILD_ver"]:
+        log_print(
+            f"{name}: PKGBUILD: {shared_state["cached_PKGBUILD_ver"][name]}, saved {saved_pkgver}"
+        )
+        if shared_state["cached_PKGBUILD_ver"][name] > saved_pkgver:
+            return 0
+        else:
+            return 1
     else:
         start_container(shared_state)
         if rsync_package_to_container(entry, shared_state) != 0:
@@ -1678,6 +1703,7 @@ def main():
     shared_state["pending_pkgs"] = set()
     shared_state["built_pkgs"] = set()
     shared_state["failed_pkgs"] = set()
+    shared_state["cached_PKGBUILD_ver"] = dict()
     global GLOBAL_TOML_D
     GLOBAL_TOML_D = toml_d
     global GLOBAL_SHARED_STATE
