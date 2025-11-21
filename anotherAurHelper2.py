@@ -1206,6 +1206,8 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                             )
                             break
                 line = srcinfo.readline()
+        if SRCINFO_epoch is None and SRCINFO_pkgver is not None and SRCINFO_pkgrel is not None:
+            SRCINFO_ver = ArchPkgVersion(SRCINFO_pkgver + "-" + SRCINFO_pkgrel)
         if SRCINFO_ver is None:
             return 2
         log_print(
