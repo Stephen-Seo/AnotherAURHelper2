@@ -235,6 +235,9 @@ class ArchPkgVersion:
         self_str += "-" + str(self.pkgrel)
         return self_str
 
+    def __repr__(self):
+        "<ArchPkgVersion: " + self.__str__() + " >"
+
 
 def get_datetime_now() -> str:
     """Returns formatted string now."""
