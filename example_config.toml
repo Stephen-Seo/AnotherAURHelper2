@@ -12,6 +12,7 @@ editor = "/usr/bin/vim"
 tz_force_offset_hours = 9
 tz_force_offset_minutes = 0
 log_file = "/home/stephen/Documents/aurbuild/log.log"
+# Affects logs in "logs_dir", not the "log_file"
 log_limit = 4294967296
 logs_dir = "/home/stephen/Documents/aurbuild/buildlogs"
 error_on_limit = true
