@@ -373,7 +373,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "modrinth-app"
 only_check_SRCINFO = true
 full_link_cargo_registry = true
-hash_compare_PKGBUILD = true
+hash_compare_PKGBUILD = false
 
 [[entry]]
 name = "modrinth-app-bin"
@@ -515,7 +515,7 @@ name = "ungoogled-chromium-archlinux"
 repo_path = "https://github.com/ungoogled-software/ungoogled-chromium-archlinux.git"
 pkg_name = "ungoogled-chromium"
 ccache_dir = "/home/aur2/ccache_dirs/ungoogled_chromium"
-hash_compare_PKGBUILD = true
+hash_compare_PKGBUILD = false
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/ungoogled_PKGBUILD"
 
 [[entry]]
