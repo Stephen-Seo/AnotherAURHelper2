@@ -1103,16 +1103,17 @@ def get_pkgver(
 ) -> typing.Optional[ArchPkgVersion]:
     """Gets the latest built version of a package."""
     name = entry["name"]
+    pkg_name = entry["name"] if "pkg_name" not in entry else entry["pkg_name"]
     pkgs_out_dir = pathlib.PosixPath(shared_state["toml"]["pkgs_out_dir"])
     repo_name = shared_state["toml"]["aur_repo_name"]
     repo_path = pkgs_out_dir / f"{repo_name}.db.tar"
     try:
         with tarfile.open(name=repo_path) as f:
             repo_names = f.getnames()
-            name_regex = re.compile(f"""^{name}-(.*)$""")
+            name_regex = re.compile(f"""^{pkg_name}-(.*)$""")
             repo_names = list(
                 filter(
-                    lambda p: p.find(name) != -1
+                    lambda p: p.find(pkg_name) != -1
                     and p.find("/desc") != -1
                     and name_regex.fullmatch(p) is not None,
                     repo_names,
@@ -1120,7 +1121,7 @@ def get_pkgver(
             )
             repo_names_idx = 0
             if len(repo_names) == 0:
-                log_print(f"{name} not in {repo_name}.db.tar!")
+                log_print(f"{pkg_name} not in {repo_name}.db.tar!")
                 return None
             elif len(repo_names) > 1:
                 for idx in range(len(repo_names)):
@@ -1131,7 +1132,7 @@ def get_pkgver(
                     while len(line) != 0:
                         if line.decode().strip() == "%NAME%":
                             line = desc_f.readline()
-                            if line.decode().strip() == name:
+                            if line.decode().strip() == pkg_name:
                                 repo_names_idx = idx
                                 name_found = True
                             break
