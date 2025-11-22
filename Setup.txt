@@ -44,6 +44,12 @@ build_in_tmpfs = false
 ...in your config. This option will fetch and build into RAM if enabled. Having
 at least 64GiB would be ideal.
 
+The main log file specified by "log_file" in the config, and the per-pacakge
+logs logged into the "logs_dir" (also specified in the config) should be handled
+properly, otherwise some disk space may be wasted storing old log files that may
+be long. It is recommended to use a program like "logrotate" on the HOST to
+periodically clear up log files.
+
 --------------------------------------------------------------------------------
     The Container
 --------------------------------------------------------------------------------
