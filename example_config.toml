@@ -550,6 +550,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "helix-git"
 full_link_cargo_registry = true
 hash_compare_PKGBUILD = true
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/helix-git_PKGBUILD"
 
 [[entry]]
 name = "ion-git"
