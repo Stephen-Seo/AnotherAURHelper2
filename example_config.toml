@@ -424,6 +424,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "qjoypad"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/qjoypad_PKGBUILD"
 
 [[entry]]
 name = "rsgain"
@@ -486,22 +487,6 @@ name = "umlet"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "umlet"
 only_check_SRCINFO = true
-hash_compare_PKGBUILD = true
-
-[[entry]]
-name = "wlrobs"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "wlrobs"
-only_check_SRCINFO = true
-aur_deps = [
-    "obs-studio-git",
-    "wlroots-git"
-]
-other_deps = [
-    "mesa",
-    "pipewire-jack",
-    "wireplumber"
-]
 hash_compare_PKGBUILD = true
 
 [[entry]]
