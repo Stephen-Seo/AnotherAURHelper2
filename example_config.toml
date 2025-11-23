@@ -373,7 +373,6 @@ name = "modrinth-app"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "modrinth-app"
 only_check_SRCINFO = true
-full_link_cargo_registry = true
 hash_compare_PKGBUILD = false
 
 [[entry]]
@@ -526,14 +525,12 @@ hash_compare_PKGBUILD = true
 name = "gnvim-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "gnvim-git"
-full_link_cargo_registry = true
 hash_compare_PKGBUILD = true
 
 [[entry]]
 name = "helix-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "helix-git"
-full_link_cargo_registry = true
 hash_compare_PKGBUILD = true
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/helix-git_PKGBUILD"
 
@@ -541,14 +538,12 @@ PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/helix-git_PKGBU
 name = "ion-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "ion-git"
-full_link_cargo_registry = true
 hash_compare_PKGBUILD = true
 
 [[entry]]
 name = "neovide-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "neovide-git"
-full_link_cargo_registry = true
 hash_compare_PKGBUILD = true
 
 [[entry]]
@@ -627,7 +622,6 @@ name = "t-rec-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "t-rec-git"
 hash_compare_PKGBUILD = true
-full_link_cargo_registry = true
 
 [[entry]]
 name = "tenacity-git"
