@@ -1810,6 +1810,8 @@ def main():
         log_print("ERROR: Failed to parse toml config file!")
         parser.print_usage()
         return
+    if "container_sshd_port" not in toml_d:
+        toml_d["container_sshd_port"] = 22
     shared_state = dict()
     shared_state["toml"] = toml_d
     shared_state["pending_pkgs"] = set()
