@@ -45,7 +45,7 @@ PKG_REL_RE = re.compile("^(.*)-([0-9]+)$")
 IS_DIGIT_REGEX = re.compile("^[0-9]+$")
 IS_PKG_REGEX = re.compile(r"^.*\.pkg\.tar\.([a-z]+)$")
 CONTAINER_WAIT_TIMEOUT = 20
-CONTAINER_SSH_WAIT_TIMEOUT = 3
+CONTAINER_SSH_WAIT_TIMEOUT = 2
 SQLITE_PKGBUILD_SCHEMA = (
     "CREATE TABLE IF NOT EXISTS PkgbuildHash (PKG TEXT PRIMARY KEY, HASH TEXT)"
 )
