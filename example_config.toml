@@ -2,6 +2,7 @@ aur_repo_name = "sdcustom"
 container_name = "aurbuild"
 container_user = "aur"
 container_addr = "10.5.0.2"
+container_sshd_port = 22
 container_identity_file = "/home/stephen/.ssh/nspawn_aurbuild"
 pkgs_out_dir = "/home/stephen/Documents/aurbuild/pkgs"
 clones_dir = "/home/stephen/Documents/aurbuild/clones"

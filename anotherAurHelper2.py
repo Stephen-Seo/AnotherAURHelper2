@@ -569,6 +569,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
     user = shared_state["toml"]["container_user"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
     other_deps = entry["other_deps"] if "other_deps" in entry else list()
     aur_deps = get_aur_deps(entry, shared_state)
     try:
@@ -585,6 +586,8 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
@@ -609,6 +612,8 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
@@ -637,6 +642,8 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
@@ -653,6 +660,8 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         subprocess.run(
             (
                 "/usr/bin/ssh",
+                "-p",
+                ssh_port,
                 "-i",
                 id_file,
                 f"{user}@{c_addr}",
@@ -666,6 +675,8 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         run_ret = subprocess.run(
             (
                 "/usr/bin/ssh",
+                "-p",
+                ssh_port,
                 "-i",
                 id_file,
                 f"{user}@{c_addr}",
@@ -691,6 +702,8 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
@@ -771,6 +784,7 @@ def start_container(shared_state: dict) -> int:
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
     user = shared_state["toml"]["container_user"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
     if stop_ret != 0:
         log_print("ERROR: Failed to stop before starting container!")
         return 1
@@ -802,7 +816,7 @@ def start_container(shared_state: dict) -> int:
     while not ssh_is_ready:
         try:
             subprocess.run(
-                f"ssh -i {id_file} {user}@{c_addr} ls",
+                f"ssh -p {ssh_port} -i {id_file} {user}@{c_addr} ls",
                 check=True,
                 text=True,
                 shell=True,
@@ -830,6 +844,7 @@ def rsync_package_to_container(entry: dict, shared_state: dict) -> int:
     user = shared_state["toml"]["container_user"]
     c_addr = shared_state["toml"]["container_addr"]
     id_file = shared_state["toml"]["container_identity_file"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
     if shared_state["toml"]["build_in_tmpfs"]:
         dest_dir = f"/tmp/{name}"
     else:
@@ -840,7 +855,7 @@ def rsync_package_to_container(entry: dict, shared_state: dict) -> int:
             (
                 "/usr/bin/rsync",
                 "-e",
-                f"ssh -i {id_file}",
+                f"ssh -p {ssh_port} -i {id_file}",
                 "-rivt",
                 "--exclude=/.git*",
                 f"{clone_dir}/",
@@ -864,6 +879,7 @@ def rsync_package_from_container(entry: dict, shared_state: dict) -> int:
     user = shared_state["toml"]["container_user"]
     c_addr = shared_state["toml"]["container_addr"]
     id_file = shared_state["toml"]["container_identity_file"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
     if shared_state["toml"]["build_in_tmpfs"]:
         dest_dir = f"/tmp/{name}"
     else:
@@ -874,7 +890,7 @@ def rsync_package_from_container(entry: dict, shared_state: dict) -> int:
             (
                 "/usr/bin/rsync",
                 "-e",
-                f"ssh -i {id_file}",
+                f"ssh -p {ssh_port} -i {id_file}",
                 "-rivt",
                 "--exclude=/src*",
                 "--exclude=/pkg*",
@@ -899,6 +915,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
     other_deps = entry["other_deps"] if "other_deps" in entry else list()
     aur_deps = get_aur_deps(entry, shared_state)
     pkg_ver = get_pkgver(entry, shared_state)
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
     if shared_state["toml"]["build_in_tmpfs"]:
         dest_dir = f"/tmp/{name}"
     else:
@@ -927,6 +944,8 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
@@ -945,6 +964,8 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
@@ -969,6 +990,8 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
@@ -987,6 +1010,8 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
@@ -1006,6 +1031,8 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
@@ -1021,6 +1048,8 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 run_ret = subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-p",
+                        ssh_port,
                         "-i",
                         id_file,
                         f"{user}@{c_addr}",
@@ -1034,6 +1063,8 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 run_ret = subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-p",
+                        ssh_port,
                         "-i",
                         id_file,
                         f"{user}@{c_addr}",
@@ -1055,6 +1086,8 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-p",
+                        ssh_port,
                         "-i",
                         id_file,
                         f"{user}@{c_addr}",
@@ -1077,6 +1110,8 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             p1 = subprocess.Popen(
                 (
                     "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
@@ -1190,6 +1225,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     aur_deps = get_aur_deps(entry, shared_state)
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
     clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
     clone_dir = clones_dir / name
     SRCINFO_path = clone_dir / ".SRCINFO"
@@ -1295,6 +1331,8 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                 subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-p",
+                        ssh_port,
                         "-i",
                         id_file,
                         f"{user}@{c_addr}",
@@ -1313,6 +1351,8 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                 subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-p",
+                        ssh_port,
                         "-i",
                         id_file,
                         f"{user}@{c_addr}",
@@ -1340,6 +1380,8 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                 subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-p",
+                        ssh_port,
                         "-i",
                         id_file,
                         f"{user}@{c_addr}",
@@ -1355,6 +1397,8 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
             run_ret = subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
@@ -1582,13 +1626,14 @@ def rsync_file_to_dest(
     user = shared_state["toml"]["container_user"]
     c_addr = shared_state["toml"]["container_addr"]
     id_file = shared_state["toml"]["container_identity_file"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
     full_dest_dir = f"{user}@{c_addr}:{dest}"
     try:
         subprocess.run(
             (
                 "/usr/bin/rsync",
                 "-e",
-                f"ssh -i {id_file}",
+                f"ssh -p {ssh_port} -i {id_file}",
                 "-ivt",
                 file.as_posix(),
                 full_dest_dir,
@@ -1611,13 +1656,14 @@ def rsync_dir_to_dest(
     user = shared_state["toml"]["container_user"]
     c_addr = shared_state["toml"]["container_addr"]
     id_file = shared_state["toml"]["container_identity_file"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
     full_dest_dir = f"{user}@{c_addr}:{dest}"
     try:
         subprocess.run(
             (
                 "/usr/bin/rsync",
                 "-e",
-                f"ssh -i {id_file}",
+                f"ssh -p {ssh_port} -i {id_file}",
                 "-rivt",
                 dir_path.as_posix() + "/",
                 full_dest_dir,
@@ -1667,6 +1713,7 @@ def rsync_checking_gpg(shared_state: dict) -> str:
     c_addr = shared_state["toml"]["container_addr"]
     id_file = shared_state["toml"]["container_identity_file"]
     checking_gpg_dir = shared_state["toml"]["checking_gpg_dir"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
     if shared_state["toml"]["build_in_tmpfs"]:
         dest_dir = "/tmp/checking_gpg"
     else:
@@ -1677,7 +1724,7 @@ def rsync_checking_gpg(shared_state: dict) -> str:
             (
                 "/usr/bin/rsync",
                 "-e",
-                f"ssh -i {id_file}",
+                f"ssh -p {ssh_port} -i {id_file}",
                 "-rivt",
                 "--chmod=D700,F600",
                 checking_gpg_dir + "/",
