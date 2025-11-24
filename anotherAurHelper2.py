@@ -780,11 +780,11 @@ def start_container(shared_state: dict) -> int:
     """Returns 0 on success."""
     container = shared_state["toml"]["container_name"]
     container_addr = shared_state["toml"]["container_addr"]
-    stop_ret = stop_container(shared_state)
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
     user = shared_state["toml"]["container_user"]
     ssh_port = str(shared_state["toml"]["container_sshd_port"])
+    stop_ret = stop_container(shared_state)
     if stop_ret != 0:
         log_print("ERROR: Failed to stop before starting container!")
         return 1
