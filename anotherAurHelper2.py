@@ -45,6 +45,7 @@ PKG_REL_RE = re.compile("^(.*)-([0-9]+)$")
 IS_DIGIT_REGEX = re.compile("^[0-9]+$")
 IS_PKG_REGEX = re.compile(r"^.*\.pkg\.tar\.([a-z]+)$")
 CONTAINER_WAIT_TIMEOUT = 20
+CONTAINER_SSH_WAIT_TIMEOUT = 3
 SQLITE_PKGBUILD_SCHEMA = (
     "CREATE TABLE IF NOT EXISTS PkgbuildHash (PKG TEXT PRIMARY KEY, HASH TEXT)"
 )
@@ -767,6 +768,9 @@ def start_container(shared_state: dict) -> int:
     container = shared_state["toml"]["container_name"]
     container_addr = shared_state["toml"]["container_addr"]
     stop_ret = stop_container(shared_state)
+    id_file = shared_state["toml"]["container_identity_file"]
+    c_addr = shared_state["toml"]["container_addr"]
+    user = shared_state["toml"]["container_user"]
     if stop_ret != 0:
         log_print("ERROR: Failed to stop before starting container!")
         return 1
@@ -792,6 +796,29 @@ def start_container(shared_state: dict) -> int:
         log_print("ERROR: Failed to start container!")
         log_print(repr(sys.exception()))
         return 1
+
+    ssh_is_ready = False
+    fail_count = 0
+    while not ssh_is_ready:
+        try:
+            subprocess.run(
+                f"ssh -i {id_file} {user}@{c_addr} ls",
+                check=True,
+                text=True,
+                shell=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=CONTAINER_SSH_WAIT_TIMEOUT,
+            )
+            ssh_is_ready = True
+        except:
+            fail_count += 1
+            if fail_count > 10:
+                log_print("ERROR: Failed to check container ssh!")
+                log_print(repr(sys.exception()))
+                return 1
+            continue
+
     return 0
 
 
