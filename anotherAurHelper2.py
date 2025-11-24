@@ -2061,30 +2061,6 @@ def main():
             break
         if do_continue:
             continue
-        log_print(f"OK with pkg {entry["name"]}?")
-        user_result = user_interact_alpha(
-            "OK with pkg?",
-            ["OK", "Not OK", "Force build", "Retry"],
-            True,
-            shared_state,
-        )
-        if user_result == "interrupt":
-            return
-        elif user_result == "Force build":
-            shared_state["confirmed"].add(entry["name"])
-            shared_state["pending_pkgs"].add(entry["name"])
-            idx += 1
-            continue
-        elif user_result == "Retry":
-            continue
-        elif user_result != "OK":
-            log_print(
-                f"""Skipping "{entry['name']}" due to user not OK with pkg..."""
-            )
-            shared_state["skipped"].add(entry["name"])
-            idx += 1
-            continue
-        log_print(f"User is OK with \"{entry['name']}\"")
         verif_ret = verify_to_build(entry, shared_state)
         if verif_ret == 0:
             shared_state["confirmed"].add(entry["name"])
@@ -2108,6 +2084,36 @@ def main():
             elif user_result == "Abort" or user_result == "interrupt":
                 return
             shared_state["skipped"].add(entry["name"])
+        log_print(f"OK with pkg {entry["name"]}?")
+        user_result = user_interact_alpha(
+            "OK with pkg?",
+            ["OK", "Not OK", "Force build", "Retry"],
+            True,
+            shared_state,
+        )
+        if user_result == "interrupt":
+            return
+        elif user_result == "Force build":
+            shared_state["confirmed"].add(entry["name"])
+            shared_state["pending_pkgs"].add(entry["name"])
+            shared_state["skipped"].remove(entry["name"])
+            idx += 1
+            continue
+        elif user_result == "Retry":
+            shared_state["confirmed"].remove(entry["name"])
+            shared_state["pending_pkgs"].remove(entry["name"])
+            shared_state["skipped"].remove(entry["name"])
+            continue
+        elif user_result != "OK":
+            log_print(
+                f"""Skipping "{entry['name']}" due to user not OK with pkg..."""
+            )
+            shared_state["confirmed"].remove(entry["name"])
+            shared_state["pending_pkgs"].remove(entry["name"])
+            shared_state["skipped"].add(entry["name"])
+            idx += 1
+            continue
+        log_print(f"User is OK with \"{entry['name']}\"")
         idx += 1
 
     # Multiple passes through all packages.
