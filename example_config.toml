@@ -546,6 +546,7 @@ name = "neovide-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "neovide-git"
 hash_compare_PKGBUILD = true
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/neovide_PKGBUILD"
 
 [[entry]]
 name = "obs-studio-git"
