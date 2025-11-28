@@ -157,3 +157,20 @@ line:
 #DownloadUser = alpm
 
 These two changes will cause the container to use the host's pacman cache.
+
+
+If one wants as much as possible in the tmpfs (RAM), the option:
+
+build_in_tmpfs = false
+
+...in the config puts the build into /tmp in the container.
+
+Also, consider:
+
+[Files]
+Volatile=overlay
+
+...to make filesystem changes in the container to also be put into the temporary
+file system.
+WARNING: You must set "Volatile=no" and "Ephemeral=no" if you want to update the
+container, and change it back after powering it off.
