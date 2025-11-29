@@ -749,7 +749,7 @@ def stop_container(shared_state: dict) -> int:
     )
     if subproc_ret.stdout.strip() == "inactive":
         return 0
-    elif subproc_ret.stdout.strip() != "active":
+    elif subproc_ret.stdout.strip().find("active") == -1:
         return 1
     try:
         subprocess.run(
