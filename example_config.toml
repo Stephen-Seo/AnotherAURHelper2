@@ -389,6 +389,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "moonscript"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/moonscript_PKGBUILD"
 
 [[entry]]
 name = "nginx_passwd"
