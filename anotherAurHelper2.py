@@ -2011,7 +2011,9 @@ def main():
             shared_state["confirmed"].add(entry["name"])
             shared_state["pending_pkgs"].add(entry["name"])
             continue
-        log_print(f"Checking {entry['name']}...")
+        log_print(
+            f"Checking {entry['name']} ({idx + 1} of {len(toml_d["entry"])})..."
+        )
         if check_clone_package(entry, shared_state) == 0:
             log_print(
                 f"""Skipping "{entry['name']}" due to clone/update issue..."""
@@ -2089,7 +2091,7 @@ def main():
         log_print(f"OK with pkg {entry["name"]}?")
         user_result = user_interact_alpha(
             "OK with pkg?",
-            ["OK", "Not OK", "Force build", "Retry"],
+            ["OK", "Not OK", "Force build", "Retry", "Back"],
             True,
             shared_state,
         )
@@ -2104,11 +2106,29 @@ def main():
             continue
         elif user_result == "Retry":
             if entry["name"] in shared_state["confirmed"]:
-              shared_state["confirmed"].remove(entry["name"])
+                shared_state["confirmed"].remove(entry["name"])
             if entry["name"] in shared_state["pending_pkgs"]:
-              shared_state["pending_pkgs"].remove(entry["name"])
+                shared_state["pending_pkgs"].remove(entry["name"])
             if entry["name"] in shared_state["skipped"]:
-              shared_state["skipped"].remove(entry["name"])
+                shared_state["skipped"].remove(entry["name"])
+            continue
+        elif user_result == "Back":
+            if entry["name"] in shared_state["confirmed"]:
+                shared_state["confirmed"].remove(entry["name"])
+            if entry["name"] in shared_state["pending_pkgs"]:
+                shared_state["pending_pkgs"].remove(entry["name"])
+            if entry["name"] in shared_state["skipped"]:
+                shared_state["skipped"].remove(entry["name"])
+            idx -= 1
+            if idx < 0:
+                idx = 0
+            entry = toml_d["entry"][idx]
+            if entry["name"] in shared_state["confirmed"]:
+                shared_state["confirmed"].remove(entry["name"])
+            if entry["name"] in shared_state["pending_pkgs"]:
+                shared_state["pending_pkgs"].remove(entry["name"])
+            if entry["name"] in shared_state["skipped"]:
+                shared_state["skipped"].remove(entry["name"])
             continue
         elif user_result != "OK":
             log_print(
