@@ -564,10 +564,14 @@ name = "pasystray-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "pasystray-git"
 hash_compare_PKGBUILD = true
+other_deps = [
+    "gtk3"
+]
 aur_deps = [
     "gnome-icon-theme",
     "gnome-icon-theme-symbolic"
 ]
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/pasystray-git_PKGBUILD"
 
 [[entry]]
 name = "xorg-xwayland-git"
