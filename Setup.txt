@@ -122,6 +122,18 @@ container doesn't hang for the default 90 seconds (edit
 DefaultTimeoutStopSec=10s
 ...
 
+Remove the timer that updates pacman-key keys from starting in the CONTAINER by
+removing it from
+/usr/lib/systemd/system/timers.target.wants/archlinux-keyring-wkd-sync.timer
+Also add the line to /etc/pacman.conf in the CONTAINER:
+
+NoExtract = usr/lib/systemd/system/timers.target.wants/archlinux-keyring-wkd-sync.timer
+
+By disabling this timer in the CONTAINER, it will not try to update the pacman
+keyring's keys during package processing. You will still need to do this
+manually weekly by running `systemctl start archlinux-keyring-wkd-sync.service`
+when also doing updates.
+
 Stop the container before the next step:
 Add the following text snippet to /etc/systemd/nspawn/aurbuild.nspawn :
 
