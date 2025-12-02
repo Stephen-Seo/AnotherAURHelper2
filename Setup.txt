@@ -173,7 +173,7 @@ These two changes will cause the container to use the host's pacman cache.
 
 If one wants as much as possible in the tmpfs (RAM), the option:
 
-build_in_tmpfs = false
+build_in_tmpfs = true
 
 ...in the config puts the build into /tmp in the container.
 
