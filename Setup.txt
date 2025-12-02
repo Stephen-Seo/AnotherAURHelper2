@@ -174,3 +174,22 @@ Volatile=overlay
 file system.
 WARNING: You must set "Volatile=no" and "Ephemeral=no" if you want to update the
 container, and change it back after powering it off.
+
+
+The workflow to update the CONTAINER:
+
+1. Power off the container with `machinectl poweroff aurbuild`.
+2. Ensure the container is off with `machinectl list`.
+3. Open "/etc/systemd/nspawn/aurbuild.nspawn" in the host and modify lines that
+   make the running container immutable:
+   - Ephemeral=off
+   - Volatile=no # If not using tmpfs, comment it out or leave as "no".
+4. Start the "aurbuild" container.
+5. Use `machinectl shell aurbuild` to get a root shell in the container.
+6. Do your modifications in the container (like `pacman -Syu`).
+7. Exit the CONTAINER shell after modifications.
+8. Power off the container with `machinectl poweroff aurbuild`.
+9. Use `machinectl list` to ensure the container isn't running.
+10. Edit "/etc/systemd/nspawn/aurbuild.nspawn" to change it back to "immutable":
+   - Ephemeral=on
+   - Volatile=overlay # If not using tmpfs, comment it out or leave as "no".
