@@ -20,6 +20,7 @@ error_on_limit = true
 print_build_logs = true
 build_in_tmpfs = true
 database_path = "/home/stephen/Documents/aurbuild/state.db"
+cargo_home_path = "/home/stephen/Documents/aurbuild/cargo-home"
 
 
 [[entry]]

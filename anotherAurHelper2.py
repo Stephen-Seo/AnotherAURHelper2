@@ -630,6 +630,8 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
 
+        rsync_cargo_home_to_container(entry, shared_state)
+
         if "PKGBUILD_patches_dir" in entry:
             patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
             if (
@@ -711,6 +713,9 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                 ),
                 check=True,
             )
+
+        rsync_cargo_home_from_container(entry, shared_state)
+        delete_cargo_home_in_container(entry, shared_state)
 
         if rsync_package_from_container(entry, shared_state) != 0:
             return 1
@@ -907,6 +912,117 @@ def rsync_package_from_container(entry: dict, shared_state: dict) -> int:
     return 0
 
 
+def rsync_cargo_home_to_container(entry: dict, shared_state: dict) -> int:
+    """Returns 0 on success."""
+    name = entry["name"]
+    clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
+    clone_dir = clones_dir / name
+    user = shared_state["toml"]["container_user"]
+    c_addr = shared_state["toml"]["container_addr"]
+    id_file = shared_state["toml"]["container_identity_file"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
+    if shared_state["toml"]["build_in_tmpfs"]:
+        dest_dir = f"/tmp/{name}/cargo-home"
+    else:
+        dest_dir = name + "/" + "cargo-home"
+    full_dest_dir = f"{user}@{c_addr}:{dest_dir}/"
+    if "cargo_home_path" in shared_state["toml"]:
+        cargo_home_path = shared_state["toml"]["cargo_home_path"]
+    else:
+        return 1
+    try:
+        subprocess.run(
+            (
+                "/usr/bin/rsync",
+                "-e",
+                f"ssh -p {ssh_port} -i {id_file}",
+                "-rivt",
+                cargo_home_path + "/",
+                full_dest_dir,
+            ),
+            check=True,
+            text=True,
+        )
+    except:
+        log_print("WARNING: Failed to rsync cargo-home to CONTAINER!")
+        log_print(repr(sys.exception()))
+        return 1
+
+    return 0
+
+
+def rsync_cargo_home_from_container(entry: dict, shared_state: dict) -> int:
+    """Returns 0 on success."""
+    name = entry["name"]
+    clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
+    clone_dir = clones_dir / name
+    user = shared_state["toml"]["container_user"]
+    c_addr = shared_state["toml"]["container_addr"]
+    id_file = shared_state["toml"]["container_identity_file"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
+    if shared_state["toml"]["build_in_tmpfs"]:
+        dest_dir = f"/tmp/{name}/cargo-home"
+    else:
+        dest_dir = name + "/" + "cargo-home"
+    full_dest_dir = f"{user}@{c_addr}:{dest_dir}/"
+    if "cargo_home_path" in shared_state["toml"]:
+        cargo_home_path = shared_state["toml"]["cargo_home_path"]
+    else:
+        return 1
+    try:
+        subprocess.run(
+            (
+                "/usr/bin/rsync",
+                "-e",
+                f"ssh -p {ssh_port} -i {id_file}",
+                "-rivt",
+                full_dest_dir,
+                cargo_home_path + "/",
+            ),
+            check=True,
+            text=True,
+        )
+    except:
+        log_print("WARNING: Failed to rsync cargo-home from CONTAINER!")
+        log_print(repr(sys.exception()))
+        return 1
+    return 0
+
+
+def delete_cargo_home_in_container(entry: dict, shared_state: dict) -> int:
+    """Returns 0 on success."""
+    name = entry["name"]
+    clones_dir = pathlib.PosixPath(shared_state["toml"]["clones_dir"])
+    clone_dir = clones_dir / name
+    user = shared_state["toml"]["container_user"]
+    c_addr = shared_state["toml"]["container_addr"]
+    id_file = shared_state["toml"]["container_identity_file"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
+    if shared_state["toml"]["build_in_tmpfs"]:
+        dest_dir = f"/tmp/{name}/cargo-home"
+    else:
+        dest_dir = name + "/" + "cargo-home"
+    try:
+        subprocess.run(
+            (
+                "/usr/bin/ssh",
+                "-p",
+                ssh_port,
+                "-i",
+                id_file,
+                f"{user}@{c_addr}",
+                f"rm -rf {dest_dir}",
+            ),
+            check=True,
+            text=True,
+        )
+    except:
+        log_print("WARNING: Failed to remove cargo-home in CONTAINER!")
+        log_print(repr(sys.exception()))
+        return 1
+    return 0
+
+
 def build_pkg(entry: dict, shared_state: dict) -> int:
     """Returns 0 on success, 1 on error."""
     name = entry["name"]
@@ -931,6 +1047,8 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
 
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
+
+        rsync_cargo_home_to_container(entry, shared_state)
 
         if "PKGBUILD_patches_dir" in entry:
             patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
@@ -1147,6 +1265,9 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     f"pOpen process non-zero return code {p1.returncode}"
                 )
 
+        rsync_cargo_home_from_container(entry, shared_state)
+        delete_cargo_home_in_container(entry, shared_state)
+
         if rsync_package_from_container(entry, shared_state) != 0:
             return 1
 
@@ -1316,8 +1437,12 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
             return 1
     else:
         start_container(shared_state)
+
         if rsync_package_to_container(entry, shared_state) != 0:
             return 2
+
+        rsync_cargo_home_to_container(entry, shared_state)
+
         try:
             if "PKGBUILD_patches_dir" in entry:
                 patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
@@ -1410,6 +1535,9 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
             )
             # log_print("DEBUG: stdout is: " + run_ret.stdout.strip())
             PKGBUILD_ver = ArchPkgVersion(run_ret.stdout.strip())
+
+            rsync_cargo_home_from_container(entry, shared_state)
+            delete_cargo_home_in_container(entry, shared_state)
         except:
             log_print("ERROR: Failed to verify if entry should be built!")
             log_print(repr(sys.exception()))
@@ -1783,6 +1911,19 @@ def cleanup_packages(shared_state: dict, dry_run: bool) -> int:
                 log_print(repr(sys.exception()))
 
     return 0
+
+
+def delete_posix_path_dir(path: pathlib.PosixPath):
+    """Recursively deletes a dir path."""
+    if not path.is_dir():
+        return
+    l = list(path.walk(top_down=False))
+    for pp, d_list, f_list in l:
+        for f in f_list:
+            (pp / f).unlink()
+        for d in d_list:
+            (pp / d).rmdir()
+    path.rmdir()
 
 
 def main():
