@@ -29,6 +29,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "aurutils"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "bindfs"
@@ -36,6 +37,8 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "bindfs"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
 
 [[entry]]
 name = "curseforge"
@@ -43,6 +46,8 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "curseforge"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
 
 [[entry]]
 name = "f3"
@@ -50,6 +55,8 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "f3"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
 
 [[entry]]
 name = "festival-freebsoft-utils"
@@ -57,6 +64,8 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "festival-freebsoft-utils"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
 
 [[entry]]
 name = "gdk-pixbuf2-noglycin"
@@ -64,6 +73,8 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "gdk-pixbuf2-noglycin"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
 
 [[entry]]
 name = "gnome-icon-theme-symbolic"
@@ -71,6 +82,8 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "gnome-icon-theme-symbolic"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
 
 [[entry]]
 name = "gnome-icon-theme"
@@ -81,6 +94,8 @@ aur_deps = [
 ]
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
 
 [[entry]]
 name = "gromit-mpx"
@@ -88,6 +103,8 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "gromit-mpx"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
 
 [[entry]]
 name = "helm-synth"
@@ -95,6 +112,8 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "helm-synth"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
 
 [[entry]]
 name = "icecat"
@@ -117,6 +136,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "lib32-jemalloc"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "librsvg-noglycin"
@@ -127,6 +147,7 @@ aur_deps = [
     "gdk-pixbuf2-noglycin"
 ]
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "libtai"
@@ -134,6 +155,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "libtai"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "libtree"
@@ -141,6 +163,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "libtree"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "losslesscut-bin"
@@ -148,6 +171,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "losslesscut-bin"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "multitail"
@@ -155,6 +179,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "multitail"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "ncmpcpp"
@@ -162,6 +187,7 @@ repo_path = "https://gitlab.archlinux.org/archlinux/packaging/packages/ncmpcpp.g
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/ncmpcpp_PKGBUILD"
 SOURCE_patches_dir = "/home/stephen/Documents/aurbuild/patches/ncmpcpp_SOURCES"
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "nouveau-fw"
@@ -169,6 +195,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "nouveau-fw"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "ncurses5-compat-libs"
@@ -176,6 +203,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "ncurses5-compat-libs"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "opencl-amd"
@@ -186,6 +214,7 @@ aur_deps = [
 ]
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "epson-inkjet-printer-escpr"
@@ -193,6 +222,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "epson-inkjet-printer-escpr"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "epson-inkjet-printer-escpr2"
@@ -200,6 +230,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "epson-inkjet-printer-escpr2"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "google-chrome"
@@ -207,6 +238,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "google-chrome"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "libva-vdpau-driver-chromium"
@@ -214,6 +246,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "libva-vdpau-driver-chromium"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mate-screensaver-hacks"
@@ -221,6 +254,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mate-screensaver-hacks"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mcrcon"
@@ -228,6 +262,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mcrcon"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "minecraft-launcher"
@@ -235,6 +270,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "minecraft-launcher"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-environment"
@@ -242,6 +278,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mingw-w64-environment"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-glm"
@@ -249,6 +286,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mingw-w64-glm"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-lua"
@@ -256,6 +294,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mingw-w64-lua"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-pkg-config"
@@ -263,6 +302,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mingw-w64-pkg-config"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-cmake"
@@ -274,6 +314,7 @@ aur_deps = [
 ]
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-configure"
@@ -285,6 +326,7 @@ aur_deps = [
 ]
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-zlib"
@@ -292,6 +334,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "mingw-w64-zlib"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-libpng"
@@ -305,6 +348,7 @@ aur_deps = [
 ]
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-make"
@@ -315,6 +359,7 @@ aur_deps = [
 ]
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-libsodium"
@@ -327,6 +372,7 @@ aur_deps = [
 ]
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-glfw"
@@ -339,6 +385,7 @@ aur_deps = [
 ]
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-raylib"
@@ -352,6 +399,7 @@ aur_deps = [
 ]
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "python-mingw-ldd"
@@ -359,6 +407,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "python-mingw-ldd"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "mingw-w64-ldd"
@@ -369,6 +418,7 @@ aur_deps = [
 ]
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "modrinth-app"
@@ -383,6 +433,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "modrinth-app-bin"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "moonscript"
@@ -391,6 +442,7 @@ repo_branch = "moonscript"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/moonscript_PKGBUILD"
+disable_cargo_cache = true
 
 [[entry]]
 name = "nginx_passwd"
@@ -398,6 +450,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "nginx_passwd"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "pikaur"
@@ -405,6 +458,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "pikaur"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "plzip"
@@ -412,6 +466,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "plzip"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "tarlz"
@@ -419,6 +474,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "tarlz"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "qjoypad"
@@ -427,6 +483,7 @@ repo_branch = "qjoypad"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/qjoypad_PKGBUILD"
+disable_cargo_cache = true
 
 [[entry]]
 name = "rsgain"
@@ -434,6 +491,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "rsgain"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "samsung-unified-driver"
@@ -441,6 +499,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "samsung-unified-driver"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "simplearchiver"
@@ -448,6 +507,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "simplearchiver"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "simplescreenrecorder"
@@ -455,6 +515,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "simplescreenrecorder"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "stdman"
@@ -462,6 +523,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "stdman"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "sunvox"
@@ -469,6 +531,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "sunvox"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "texlive-tikz-uml"
@@ -476,6 +539,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "texlive-tikz-uml"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "ttf-clear-sans"
@@ -483,6 +547,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "ttf-clear-sans"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "umlet"
@@ -490,6 +555,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "umlet"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "nginx-mainline-mod-fancyindex"
@@ -497,6 +563,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "nginx-mainline-mod-fancyindex"
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/nginx_fancy_index_PKGBUILD"
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "ungoogled-chromium-archlinux"
@@ -511,18 +578,21 @@ name = "cpufetch-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "cpufetch-git"
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "flamegraph-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "flamegraph-git"
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "glfw-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "glfw-git"
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "gnvim-git"
@@ -559,6 +629,7 @@ other_deps = [
     "pipewire-jack",
     "wireplumber"
 ]
+disable_cargo_cache = true
 
 [[entry]]
 name = "pasystray-git"
@@ -573,12 +644,14 @@ aur_deps = [
     "gnome-icon-theme-symbolic"
 ]
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/pasystray-git_PKGBUILD"
+disable_cargo_cache = true
 
 [[entry]]
 name = "xorg-xwayland-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "xorg-xwayland-git"
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "wlroots-git"
@@ -591,12 +664,14 @@ other_deps = [
     "libdisplay-info"
 ]
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "swaybg-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "swaybg-git"
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "sway-git"
@@ -612,24 +687,28 @@ other_deps = [
     "libdisplay-info"
 ]
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "swaylock-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "swaylock-git"
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "swayidle-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "swayidle-git"
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "t-rec-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "t-rec-git"
 hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "tenacity-git"
@@ -640,6 +719,7 @@ other_deps = [
     "rapidjson"
 ]
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/tenacity_PKGBUILD"
+disable_cargo_cache = true
 
 [[entry]]
 name = "wlhangul-git"
@@ -649,4 +729,4 @@ hash_compare_PKGBUILD = true
 other_deps = [
     "wayland-protocols"
 ]
-
+disable_cargo_cache = true

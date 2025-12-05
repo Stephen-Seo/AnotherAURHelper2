@@ -630,7 +630,11 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
 
-        rsync_cargo_home_to_container(entry, shared_state)
+        if (
+            not "disable_cargo_cache" in entry
+            or not entry["disable_cargo_cache"]
+        ):
+            rsync_cargo_home_to_container(entry, shared_state)
 
         if "PKGBUILD_patches_dir" in entry:
             patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
@@ -714,7 +718,11 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                 check=True,
             )
 
-        rsync_cargo_home_from_container(entry, shared_state)
+        if (
+            not "disable_cargo_cache" in entry
+            or not entry["disable_cargo_cache"]
+        ):
+            rsync_cargo_home_from_container(entry, shared_state)
         delete_cargo_home_in_container(entry, shared_state)
 
         if rsync_package_from_container(entry, shared_state) != 0:
@@ -1048,7 +1056,11 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
 
-        rsync_cargo_home_to_container(entry, shared_state)
+        if (
+            not "disable_cargo_cache" in entry
+            or not entry["disable_cargo_cache"]
+        ):
+            rsync_cargo_home_to_container(entry, shared_state)
 
         if "PKGBUILD_patches_dir" in entry:
             patch_dir = pathlib.PosixPath(entry["PKGBUILD_patches_dir"])
@@ -1265,7 +1277,11 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     f"pOpen process non-zero return code {p1.returncode}"
                 )
 
-        rsync_cargo_home_from_container(entry, shared_state)
+        if (
+            not "disable_cargo_cache" in entry
+            or not entry["disable_cargo_cache"]
+        ):
+            rsync_cargo_home_from_container(entry, shared_state)
         delete_cargo_home_in_container(entry, shared_state)
 
         if rsync_package_from_container(entry, shared_state) != 0:
@@ -1441,7 +1457,11 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
         if rsync_package_to_container(entry, shared_state) != 0:
             return 2
 
-        rsync_cargo_home_to_container(entry, shared_state)
+        if (
+            not "disable_cargo_cache" in entry
+            or not entry["disable_cargo_cache"]
+        ):
+            rsync_cargo_home_to_container(entry, shared_state)
 
         try:
             if "PKGBUILD_patches_dir" in entry:
@@ -1536,7 +1556,11 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
             # log_print("DEBUG: stdout is: " + run_ret.stdout.strip())
             PKGBUILD_ver = ArchPkgVersion(run_ret.stdout.strip())
 
-            rsync_cargo_home_from_container(entry, shared_state)
+            if (
+                not "disable_cargo_cache" in entry
+                or not entry["disable_cargo_cache"]
+            ):
+                rsync_cargo_home_from_container(entry, shared_state)
             delete_cargo_home_in_container(entry, shared_state)
         except:
             log_print("ERROR: Failed to verify if entry should be built!")
