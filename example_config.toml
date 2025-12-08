@@ -147,7 +147,7 @@ aur_deps = [
     "gdk-pixbuf2-noglycin"
 ]
 hash_compare_PKGBUILD = true
-disable_cargo_cache = true
+disable_cargo_cache = false
 
 [[entry]]
 name = "libtai"
@@ -708,7 +708,7 @@ name = "t-rec-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "t-rec-git"
 hash_compare_PKGBUILD = true
-disable_cargo_cache = true
+disable_cargo_cache = false
 
 [[entry]]
 name = "tenacity-git"
