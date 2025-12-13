@@ -1189,6 +1189,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     text=True,
                     capture_output=True,
                 )
+                no_prepare_str = "--noextract"
             else:
                 run_ret = subprocess.run(
                     (
