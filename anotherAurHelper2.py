@@ -1175,6 +1175,19 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         if pkg_ver is not None:
             # Check if pkgrel should be incremented.
             if len(no_prepare_str) == 0:
+                subprocess.run(
+                    (
+                        "/usr/bin/ssh",
+                        "-p",
+                        ssh_port,
+                        "-i",
+                        id_file,
+                        f"{user}@{c_addr}",
+                        f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" CARGO_HOME="{dest_dir}/cargo-home" makepkg -s --noconfirm --nobuild',
+                    ),
+                    check=True,
+                )
+                no_prepare_str = "--noextract"
                 run_ret = subprocess.run(
                     (
                         "/usr/bin/ssh",
@@ -1183,13 +1196,12 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                         "-i",
                         id_file,
                         f"{user}@{c_addr}",
-                        f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" CARGO_HOME="{dest_dir}/cargo-home" makepkg -s --noconfirm --nobuild >&/dev/null && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
+                        f'cd {dest_dir} && source PKGBUILD >&/dev/null && echo "${{epoch:-0}}:${{pkgver:-0.0}}-${{pkgrel:-1}}"',
                     ),
                     check=True,
                     text=True,
                     capture_output=True,
                 )
-                no_prepare_str = "--noextract"
             else:
                 run_ret = subprocess.run(
                     (
