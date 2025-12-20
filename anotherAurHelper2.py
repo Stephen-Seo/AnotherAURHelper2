@@ -1040,6 +1040,21 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
     aur_deps = get_aur_deps(entry, shared_state)
     pkg_ver = get_pkgver(entry, shared_state)
     ssh_port = str(shared_state["toml"]["container_sshd_port"])
+    ccache_enabled = False
+    ccache_env_str = ""
+    if "ccache_dir" in entry:
+        ccache_dir = pathlib.PosixPath(entry["ccache_dir"])
+        if "ccache_in_tmpfs" in entry and entry["ccache_in_tmpfs"]:
+            ccache_container_dir = pathlib.PosixPath("/tmp")
+            ccache_container_dir = ccache_container_dir / "ccache"
+        else:
+            ccache_container_dir = pathlib.PosixPath("/home")
+            ccache_container_dir = (
+                ccache_container_dir / entry["container_user"] / "ccache"
+            )
+        ccache_env_str = 'CCACHE_DIR="' + ccache_container_dir.as_posix() + '"'
+        ccache_enabled = True
+
     if shared_state["toml"]["build_in_tmpfs"]:
         dest_dir = f"/tmp/{name}"
     else:
@@ -1052,6 +1067,41 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         c_addr = shared_state["toml"]["container_addr"]
 
         id_file = shared_state["toml"]["container_identity_file"]
+
+        if ccache_enabled:
+            if (
+                rsync_dir_to_dest(
+                    ccache_dir,
+                    ccache_container_dir.as_posix() + "/",
+                    shared_state,
+                )
+                != 0
+            ):
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"sudo sed -i -e '/^BUILDENV/s/!ccache/ccache/' /etc/makepkg.conf",
+                ),
+                check=True,
+            )
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    "sudo pacman --noconfirm -S ccache",
+                ),
+                check=True,
+            )
 
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
@@ -1258,7 +1308,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" CARGO_HOME="{dest_dir}/cargo-home" makepkg -s --noconfirm {no_prepare_str}',
+                    f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" CARGO_HOME="{dest_dir}/cargo-home" {ccache_env_str} makepkg -s --noconfirm {no_prepare_str}',
                 ),
                 text=True,
                 stdout=subprocess.PIPE,
@@ -1297,6 +1347,11 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             rsync_cargo_home_from_container(entry, shared_state)
         delete_cargo_home_in_container(entry, shared_state)
 
+        if ccache_enabled:
+            rsync_dir_from_dest(
+                ccache_dir, ccache_container_dir.as_posix() + "/", shared_state
+            )
+
         if rsync_package_from_container(entry, shared_state) != 0:
             return 1
 
@@ -1304,6 +1359,10 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         if stop_ret != 0:
             return 1
     except:
+        if ccache_enabled:
+            rsync_dir_from_dest(
+                ccache_dir, ccache_container_dir.as_posix() + "/", shared_state
+            )
         log_print(f"""ERROR: Failed to build "{name}"!""")
         log_print(repr(sys.exception()))
         return 1
@@ -1838,6 +1897,38 @@ def rsync_dir_to_dest(
     except:
         log_print(
             f'ERROR: Failed to rsync/send "{dir_path.as_posix()}" -> "{dest}" directory!'
+        )
+        log_print(repr(sys.exception()))
+        return 1
+    return 0
+
+
+def rsync_dir_from_dest(
+    dir_path: pathlib.PosixPath, dest: str, shared_state: dict
+) -> int:
+    """Returns 0 on success."""
+    user = shared_state["toml"]["container_user"]
+    c_addr = shared_state["toml"]["container_addr"]
+    id_file = shared_state["toml"]["container_identity_file"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
+    full_dest_dir = f"{user}@{c_addr}:{dest}"
+    if full_dest_dir[len(full_dest_dir) - 1] != "/":
+        full_dest_dir += "/"
+    try:
+        subprocess.run(
+            (
+                "/usr/bin/rsync",
+                "-e",
+                f"ssh -p {ssh_port} -i {id_file}",
+                "-rivt",
+                full_dest_dir,
+                dir_path.as_posix() + "/",
+            ),
+            check=True,
+        )
+    except:
+        log_print(
+            f'ERROR: Failed to rsync/recv "{dest}" -> "{dir_path.as_posix()}" directory!'
         )
         log_print(repr(sys.exception()))
         return 1

@@ -94,6 +94,7 @@ $ EDITOR=vim visudo
 %wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman --noconfirm -Sy *
 %wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman -U *
 %wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman --noconfirm -U *
+%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/sed -i -e /^BUILDENV/s/!ccache/ccache/ /etc/makepkg.conf
 ...
 
 
