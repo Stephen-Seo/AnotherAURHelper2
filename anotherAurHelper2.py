@@ -1349,7 +1349,10 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
 
         if ccache_enabled:
             rsync_dir_from_dest(
-                ccache_dir, ccache_container_dir.as_posix() + "/", shared_state
+                ccache_dir,
+                ccache_container_dir.as_posix() + "/",
+                shared_state,
+                rsync_del=True,
             )
 
         if rsync_package_from_container(entry, shared_state) != 0:
@@ -1361,7 +1364,10 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
     except:
         if ccache_enabled:
             rsync_dir_from_dest(
-                ccache_dir, ccache_container_dir.as_posix() + "/", shared_state
+                ccache_dir,
+                ccache_container_dir.as_posix() + "/",
+                shared_state,
+                rsync_del=True,
             )
         log_print(f"""ERROR: Failed to build "{name}"!""")
         log_print(repr(sys.exception()))
@@ -1904,7 +1910,10 @@ def rsync_dir_to_dest(
 
 
 def rsync_dir_from_dest(
-    dir_path: pathlib.PosixPath, dest: str, shared_state: dict
+    dir_path: pathlib.PosixPath,
+    dest: str,
+    shared_state: dict,
+    rsync_del: bool = False,
 ) -> int:
     """Returns 0 on success."""
     user = shared_state["toml"]["container_user"]
@@ -1915,7 +1924,7 @@ def rsync_dir_from_dest(
     if full_dest_dir[len(full_dest_dir) - 1] != "/":
         full_dest_dir += "/"
     try:
-        subprocess.run(
+        args = list(
             (
                 "/usr/bin/rsync",
                 "-e",
@@ -1923,7 +1932,12 @@ def rsync_dir_from_dest(
                 "-rivt",
                 full_dest_dir,
                 dir_path.as_posix() + "/",
-            ),
+            )
+        )
+        if rsync_del:
+            args.insert(4, "--delete")
+        subprocess.run(
+            args,
             check=True,
         )
     except:
