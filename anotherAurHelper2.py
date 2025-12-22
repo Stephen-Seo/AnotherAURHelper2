@@ -1293,54 +1293,19 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
 
         nowstring = get_datetime_now()
         logs_dir_path = pathlib.PosixPath(shared_state["toml"]["logs_dir"])
-        with logs_dir_path.joinpath(
-            "{}_stdout_{}.log".format(name, nowstring)
-        ).open(
-            mode="w", encoding="utf-8"
-        ) as log_stdout, logs_dir_path.joinpath(
-            "{}_stderr_{}.log".format(name, nowstring)
-        ).open(
-            mode="w", encoding="utf-8"
-        ) as log_stderr:
-            p1 = subprocess.Popen(
-                (
-                    "/usr/bin/ssh",
-                    "-p",
-                    ssh_port,
-                    "-i",
-                    id_file,
-                    f"{user}@{c_addr}",
-                    f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" CARGO_HOME="{dest_dir}/cargo-home" {ccache_env_str} makepkg -s --noconfirm {no_prepare_str}',
-                ),
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            print_to_log = shared_state["toml"]["print_build_logs"]
-            tout = threading.Thread(
-                target=thread_handle_output_stream,
-                args=(p1.stdout, log_stdout, shared_state, print_to_log),
-            )
-            terr = threading.Thread(
-                target=thread_handle_output_stream,
-                args=(p1.stderr, log_stderr, shared_state, print_to_log),
-            )
-
-            tout.start()
-            terr.start()
-
-            p1.wait()
-            tout.join()
-            terr.join()
-
-            if p1.returncode is None:
-                raise RuntimeError("pOpen process didn't finish")
-            elif type(p1.returncode) is not int:
-                raise RuntimeError("pOpen process non-integer return-code")
-            elif p1.returncode != 0:
-                raise RuntimeError(
-                    f"pOpen process non-zero return code {p1.returncode}"
-                )
+        subprocess_log_output(
+            name,
+            [
+                "/usr/bin/ssh",
+                "-p",
+                ssh_port,
+                "-i",
+                id_file,
+                f"{user}@{c_addr}",
+                f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" CARGO_HOME="{dest_dir}/cargo-home" {ccache_env_str} makepkg -s --noconfirm {no_prepare_str}',
+            ],
+            shared_state,
+        )
 
         if (
             not "disable_cargo_cache" in entry
@@ -2068,6 +2033,50 @@ def delete_posix_path_dir(path: pathlib.PosixPath):
         for d in d_list:
             (pp / d).rmdir()
     path.rmdir()
+
+
+def subprocess_log_output(fname: str, args: list[str], shared_state: dict):
+    """Exception on error."""
+    logs_dir_path = pathlib.PosixPath(shared_state["toml"]["logs_dir"])
+    nowstring = get_datetime_now()
+    with logs_dir_path.joinpath(f"{fname}_stdout_{nowstring}.log").open(
+        mode="w", encoding="utf-8"
+    ) as log_stdout, logs_dir_path.joinpath(
+        f"{fname}_stderr_{nowstring}.log"
+    ).open(
+        mode="w", encoding="utf-8"
+    ) as log_stderr:
+        proc_handle = subprocess.Popen(
+            args,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        print_to_log = shared_state["toml"]["print_build_logs"]
+        tout = threading.Thread(
+            target=thread_handle_output_stream,
+            args=(proc_handle.stdout, log_stdout, shared_state, print_to_log),
+        )
+        terr = threading.Thread(
+            target=thread_handle_output_stream,
+            args=(proc_handle.stderr, log_stderr, shared_state, print_to_log),
+        )
+
+        tout.start()
+        terr.start()
+
+        proc_handle.wait()
+        tout.join()
+        terr.join()
+
+        if proc_handle.returncode is None:
+            raise RuntimeError("pOpen process didn't finish")
+        elif type(proc_handle.returncode) is not int:
+            raise RuntimeError("pOpen process non-integer return-code")
+        elif proc_handle.returncode != 0:
+            raise RuntimeError(
+                f"pOpen process non-zero return code {proc_handle.returncode}"
+            )
 
 
 def main():
