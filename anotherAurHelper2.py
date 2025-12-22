@@ -1891,16 +1891,14 @@ def rsync_dir_from_dest(
     if full_dest_dir[len(full_dest_dir) - 1] != "/":
         full_dest_dir += "/"
     try:
-        args = list(
-            (
-                "/usr/bin/rsync",
-                "-e",
-                f"ssh -p {ssh_port} -i {id_file}",
-                "-rivt",
-                full_dest_dir,
-                dir_path.as_posix() + "/",
-            )
-        )
+        args = [
+            "/usr/bin/rsync",
+            "-e",
+            f"ssh -p {ssh_port} -i {id_file}",
+            "-rivt",
+            full_dest_dir,
+            dir_path.as_posix() + "/",
+        ]
         if rsync_del:
             args.insert(4, "--delete")
         subprocess.run(
