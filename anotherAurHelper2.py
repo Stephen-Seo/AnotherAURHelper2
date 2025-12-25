@@ -905,8 +905,10 @@ def rsync_package_from_container(entry: dict, shared_state: dict) -> int:
                 "-e",
                 f"ssh -p {ssh_port} -i {id_file}",
                 "-rivt",
+                "--delete",
                 "--exclude=/src*",
                 "--exclude=/pkg*",
+                "--exclude=/.git*",
                 full_dest_dir,
                 f"{clone_dir}/",
             ),
@@ -1040,6 +1042,21 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
     aur_deps = get_aur_deps(entry, shared_state)
     pkg_ver = get_pkgver(entry, shared_state)
     ssh_port = str(shared_state["toml"]["container_sshd_port"])
+    ccache_enabled = False
+    ccache_env_str = ""
+    if "ccache_dir" in entry:
+        ccache_dir = pathlib.PosixPath(entry["ccache_dir"])
+        if "ccache_in_tmpfs" in entry and entry["ccache_in_tmpfs"]:
+            ccache_container_dir = pathlib.PosixPath("/tmp")
+            ccache_container_dir = ccache_container_dir / "ccache"
+        else:
+            ccache_container_dir = pathlib.PosixPath("/home")
+            ccache_container_dir = (
+                ccache_container_dir / entry["container_user"] / "ccache"
+            )
+        ccache_env_str = 'CCACHE_DIR="' + ccache_container_dir.as_posix() + '"'
+        ccache_enabled = True
+
     if shared_state["toml"]["build_in_tmpfs"]:
         dest_dir = f"/tmp/{name}"
     else:
@@ -1052,6 +1069,41 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         c_addr = shared_state["toml"]["container_addr"]
 
         id_file = shared_state["toml"]["container_identity_file"]
+
+        if ccache_enabled:
+            if (
+                rsync_dir_to_dest(
+                    ccache_dir,
+                    ccache_container_dir.as_posix() + "/",
+                    shared_state,
+                )
+                != 0
+            ):
+                return 1
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    f"sudo sed -i -e '/^BUILDENV/s/!ccache/ccache/' /etc/makepkg.conf",
+                ),
+                check=True,
+            )
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    "sudo pacman --noconfirm -S ccache",
+                ),
+                check=True,
+            )
 
         if rsync_package_to_container(entry, shared_state) != 0:
             return 1
@@ -1241,54 +1293,19 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
 
         nowstring = get_datetime_now()
         logs_dir_path = pathlib.PosixPath(shared_state["toml"]["logs_dir"])
-        with logs_dir_path.joinpath(
-            "{}_stdout_{}.log".format(name, nowstring)
-        ).open(
-            mode="w", encoding="utf-8"
-        ) as log_stdout, logs_dir_path.joinpath(
-            "{}_stderr_{}.log".format(name, nowstring)
-        ).open(
-            mode="w", encoding="utf-8"
-        ) as log_stderr:
-            p1 = subprocess.Popen(
-                (
-                    "/usr/bin/ssh",
-                    "-p",
-                    ssh_port,
-                    "-i",
-                    id_file,
-                    f"{user}@{c_addr}",
-                    f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" CARGO_HOME="{dest_dir}/cargo-home" makepkg -s --noconfirm {no_prepare_str}',
-                ),
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            print_to_log = shared_state["toml"]["print_build_logs"]
-            tout = threading.Thread(
-                target=thread_handle_output_stream,
-                args=(p1.stdout, log_stdout, shared_state, print_to_log),
-            )
-            terr = threading.Thread(
-                target=thread_handle_output_stream,
-                args=(p1.stderr, log_stderr, shared_state, print_to_log),
-            )
-
-            tout.start()
-            terr.start()
-
-            p1.wait()
-            tout.join()
-            terr.join()
-
-            if p1.returncode is None:
-                raise RuntimeError("pOpen process didn't finish")
-            elif type(p1.returncode) is not int:
-                raise RuntimeError("pOpen process non-integer return-code")
-            elif p1.returncode != 0:
-                raise RuntimeError(
-                    f"pOpen process non-zero return code {p1.returncode}"
-                )
+        subprocess_log_output(
+            name,
+            [
+                "/usr/bin/ssh",
+                "-p",
+                ssh_port,
+                "-i",
+                id_file,
+                f"{user}@{c_addr}",
+                f'cd {dest_dir} && env GNUPGHOME="{checking_gpg_dir}" CARGO_HOME="{dest_dir}/cargo-home" {ccache_env_str} makepkg -s --noconfirm {no_prepare_str}',
+            ],
+            shared_state,
+        )
 
         if (
             not "disable_cargo_cache" in entry
@@ -1297,6 +1314,14 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             rsync_cargo_home_from_container(entry, shared_state)
         delete_cargo_home_in_container(entry, shared_state)
 
+        if ccache_enabled:
+            rsync_dir_from_dest(
+                ccache_dir,
+                ccache_container_dir.as_posix() + "/",
+                shared_state,
+                rsync_del=True,
+            )
+
         if rsync_package_from_container(entry, shared_state) != 0:
             return 1
 
@@ -1304,6 +1329,13 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         if stop_ret != 0:
             return 1
     except:
+        if ccache_enabled:
+            rsync_dir_from_dest(
+                ccache_dir,
+                ccache_container_dir.as_posix() + "/",
+                shared_state,
+                rsync_del=True,
+            )
         log_print(f"""ERROR: Failed to build "{name}"!""")
         log_print(repr(sys.exception()))
         return 1
@@ -1844,6 +1876,44 @@ def rsync_dir_to_dest(
     return 0
 
 
+def rsync_dir_from_dest(
+    dir_path: pathlib.PosixPath,
+    dest: str,
+    shared_state: dict,
+    rsync_del: bool = False,
+) -> int:
+    """Returns 0 on success."""
+    user = shared_state["toml"]["container_user"]
+    c_addr = shared_state["toml"]["container_addr"]
+    id_file = shared_state["toml"]["container_identity_file"]
+    ssh_port = str(shared_state["toml"]["container_sshd_port"])
+    full_dest_dir = f"{user}@{c_addr}:{dest}"
+    if full_dest_dir[len(full_dest_dir) - 1] != "/":
+        full_dest_dir += "/"
+    try:
+        args = [
+            "/usr/bin/rsync",
+            "-e",
+            f"ssh -p {ssh_port} -i {id_file}",
+            "-rivt",
+            full_dest_dir,
+            dir_path.as_posix() + "/",
+        ]
+        if rsync_del:
+            args.insert(4, "--delete")
+        subprocess.run(
+            args,
+            check=True,
+        )
+    except:
+        log_print(
+            f'ERROR: Failed to rsync/recv "{dest}" -> "{dir_path.as_posix()}" directory!'
+        )
+        log_print(repr(sys.exception()))
+        return 1
+    return 0
+
+
 def print_pkg_status(shared_state: dict):
     if "skipped" in shared_state:
         log_print("Skipped Pkgs (usually up-to-date):")
@@ -1961,6 +2031,50 @@ def delete_posix_path_dir(path: pathlib.PosixPath):
         for d in d_list:
             (pp / d).rmdir()
     path.rmdir()
+
+
+def subprocess_log_output(fname: str, args: list[str], shared_state: dict):
+    """Exception on error."""
+    logs_dir_path = pathlib.PosixPath(shared_state["toml"]["logs_dir"])
+    nowstring = get_datetime_now()
+    with logs_dir_path.joinpath(f"{fname}_stdout_{nowstring}.log").open(
+        mode="w", encoding="utf-8"
+    ) as log_stdout, logs_dir_path.joinpath(
+        f"{fname}_stderr_{nowstring}.log"
+    ).open(
+        mode="w", encoding="utf-8"
+    ) as log_stderr:
+        proc_handle = subprocess.Popen(
+            args,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        print_to_log = shared_state["toml"]["print_build_logs"]
+        tout = threading.Thread(
+            target=thread_handle_output_stream,
+            args=(proc_handle.stdout, log_stdout, shared_state, print_to_log),
+        )
+        terr = threading.Thread(
+            target=thread_handle_output_stream,
+            args=(proc_handle.stderr, log_stderr, shared_state, print_to_log),
+        )
+
+        tout.start()
+        terr.start()
+
+        proc_handle.wait()
+        tout.join()
+        terr.join()
+
+        if proc_handle.returncode is None:
+            raise RuntimeError("pOpen process didn't finish")
+        elif type(proc_handle.returncode) is not int:
+            raise RuntimeError("pOpen process non-integer return-code")
+        elif proc_handle.returncode != 0:
+            raise RuntimeError(
+                f"pOpen process non-zero return code {proc_handle.returncode}"
+            )
 
 
 def main():

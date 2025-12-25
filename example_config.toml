@@ -569,9 +569,10 @@ disable_cargo_cache = true
 name = "ungoogled-chromium-archlinux"
 repo_path = "https://github.com/ungoogled-software/ungoogled-chromium-archlinux.git"
 pkg_name = "ungoogled-chromium"
-ccache_dir = "/home/aur2/ccache_dirs/ungoogled_chromium"
 hash_compare_PKGBUILD = false
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/ungoogled_PKGBUILD"
+ccache_dir = "/home/stephen/Documents/aurbuild/ccache/ungoogled_chromium"
+ccache_in_tmpfs = true
 
 [[entry]]
 name = "cpufetch-git"
