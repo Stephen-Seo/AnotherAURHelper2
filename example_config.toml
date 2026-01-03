@@ -77,6 +77,16 @@ disable_cargo_cache = true
 
 
 [[entry]]
+name = "git-remote-gcrypt"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "git-remote-gcrypt"
+only_check_SRCINFO = true
+hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/git-remote-gcrypt_PKGBUILD"
+
+
+[[entry]]
 name = "gnome-icon-theme-symbolic"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "gnome-icon-theme-symbolic"
