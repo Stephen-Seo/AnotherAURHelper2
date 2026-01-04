@@ -706,6 +706,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "swaylock-git"
 hash_compare_PKGBUILD = true
 disable_cargo_cache = true
+SOURCE_patches_dir = "/home/stephen/Documents/aurbuild/patches/swaylock_git_SOURCES"
 
 [[entry]]
 name = "swayidle-git"
