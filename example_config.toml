@@ -226,13 +226,13 @@ only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
-#[[entry]]
-#name = "openutau-bin"
-#repo_path = "https://github.com/archlinux/aur.git"
-#repo_branch = "openutau-bin"
-#only_check_SRCINFO = true
-#hash_compare_PKGBUILD = true
-#disable_cargo_cache = true
+[[entry]]
+name = "openutau-bin"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "openutau-bin"
+only_check_SRCINFO = true
+hash_compare_PKGBUILD = true
+disable_cargo_cache = true
 
 [[entry]]
 name = "epson-inkjet-printer-escpr"
