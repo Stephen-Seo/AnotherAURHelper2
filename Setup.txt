@@ -4,6 +4,12 @@
 
 This document has notes on how to set up the environment for AnotherAURHelper2.
 
+(Note that the following paragraph mentions btrfs as necessary, but as later
+observed, a container with "Volatile=overlay" and "Ephemeral=off" may allow
+filesystems other than btrfs, such as ext4, to use tmpfs (RAM) when temporarily
+installing packages for builds. Check the "systemd.nspawn" and "systemd-nspawn"
+man pages for these config options.)
+
 Requires an installation of ArchLinux using btrfs as the main filesystem
 (without btrfs, using "temporary clones" of the chroot will be more expensive).
 May also require a sane cache for packages if you are using multiple x86_64 Arch
