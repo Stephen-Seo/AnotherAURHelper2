@@ -237,6 +237,7 @@ the key to your pacman keyring.
 
 # Output should show only the key you added. Adjust the name and re-run this
 # command until only the key that was added is listed.
+# You may use the key's fingerprint instead of name if necessary.
 
 4. Locally-sign the key you just added so that pacman trusts it. Be sure to use
 the name that only selects the key you added as previously mentioned.
