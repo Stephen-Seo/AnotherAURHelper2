@@ -24,6 +24,7 @@ handled by systemd-nspawn and machinectl.
 
 Lines starting with ">" are commands to run on the host.
 Lines starting with "$" are commands to run in the chroot.
+Lines starting with "#" are typically comments that are often useful hints.
 
 --------------------------------------------------------------------------------
     Dependencies
