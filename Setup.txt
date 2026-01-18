@@ -212,3 +212,63 @@ The workflow to update the CONTAINER:
 10. Edit "/etc/systemd/nspawn/aurbuild.nspawn" to change it back to "immutable":
    - Ephemeral=on
    - Volatile=overlay # If not using tmpfs, comment it out or leave as "no".
+
+--------------------------------------------------------------------------------
+
+Setting up the Signing Key so that pacman Will Verify and Install Built Pkgs
+
+--------------------------------------------------------------------------------
+
+It is assumed you have already set up the signing key that resides in the
+directory specified by "signing_gpg_dir".
+
+1. Export the "signing_gpg_dir" public key.
+
+> GNUPGHOME="/path/to/signing_gpg_dir" gpg --export > my_public_key.pub
+
+2. As root on a system you want to install these packages, use pacman-key to add
+the key to your pacman keyring.
+
+> run0 pacman-key -a my_public_key.pub
+
+3. Check that you can query the key that was added.
+
+> run0 pacman-key -f MyAurHelperKey
+
+# Output should show only the key you added. Adjust the name and re-run this
+# command until only the key that was added is listed.
+
+4. Locally-sign the key you just added so that pacman trusts it. Be sure to use
+the name that only selects the key you added as previously mentioned.
+
+> run0 pacman-key --lsign-key MyAurHelperKey
+
+5. Update your /etc/pacman.conf to get the AUR pkgs.
+
+    ...
+    [my_custom_repo]
+    SigLevel = Required TrustedOnly
+    Server = file:///path/to/packages/dir
+
+# Make sure that the correct name is used. If your database file is
+# custom_repo.db.tar, then use "[custom_repo]".
+
+--------------------------------------------------------------------------------
+
+Pacman Keyring Handling and Rescue
+
+--------------------------------------------------------------------------------
+
+At any point you can remove a key from the keyring with:
+> run0 pacman-key --delete MyAurHelperKey
+
+Note that if the name is shared by multiple keys, you may accidentally remove
+multiple keys.
+
+If at any point you messed up your pacman keyring, you can reset it to normal by
+following the steps here (and on the Arch wiki
+https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys )
+
+> run0 rm /etc/pacman.d/gnupg -rf
+> run0 pacman-key --init
+> run0 pacman-key --populate
