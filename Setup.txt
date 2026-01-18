@@ -215,9 +215,7 @@ The workflow to update the CONTAINER:
    - Volatile=overlay # If not using tmpfs, comment it out or leave as "no".
 
 --------------------------------------------------------------------------------
-
-Setting up the Signing Key so that pacman Will Verify and Install Built Pkgs
-
+    Setting up the Signing Key to Install Pkgs with pacman
 --------------------------------------------------------------------------------
 
 It is assumed you have already set up the signing key that resides in the
@@ -258,9 +256,7 @@ the name that only selects the key you added as previously mentioned.
 # custom_repo.db.tar, then use "[custom_repo]".
 
 --------------------------------------------------------------------------------
-
-Pacman Keyring Handling and Rescue
-
+    Pacman Keyring Handling and Rescue
 --------------------------------------------------------------------------------
 
 At any point you can remove a key from the keyring with:
