@@ -222,7 +222,9 @@ Setting up the Signing Key so that pacman Will Verify and Install Built Pkgs
 It is assumed you have already set up the signing key that resides in the
 directory specified by "signing_gpg_dir".
 
-1. Export the "signing_gpg_dir" public key.
+1. Export the "signing_gpg_dir" public key. (It is assumed that there is only 1
+key in the signing_gpg_dir. To export only a specific key, add the key's
+fingerprint after "--export" in the following command.)
 
 > GNUPGHOME="/path/to/signing_gpg_dir" gpg --export > my_public_key.pub
 
