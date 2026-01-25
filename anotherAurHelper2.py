@@ -19,6 +19,7 @@
 import atexit
 import argparse
 import datetime
+import fcntl
 import getpass
 import hashlib
 import os
@@ -2484,4 +2485,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    with open("/tmp/anotherAurHelper2_flock", "a") as flock_fd:
+        print("Acquiring flock...")
+        fcntl.flock(flock_fd, fcntl.LOCK_EX)
+        main()
