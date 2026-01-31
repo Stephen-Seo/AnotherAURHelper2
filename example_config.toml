@@ -184,6 +184,13 @@ hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
 [[entry]]
+name = "mpd_info_screen2"
+repo_path = "https://aur.archlinux.org/mpd_info_screen2.git"
+only_check_SRCINFO = true
+hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
+[[entry]]
 name = "multitail"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "multitail"
