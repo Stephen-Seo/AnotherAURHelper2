@@ -745,6 +745,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "t-rec-git"
 hash_compare_PKGBUILD = true
 disable_cargo_cache = false
+PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/t-rec_PKGBUILD"
 
 [[entry]]
 name = "tenacity-git"
