@@ -471,6 +471,14 @@ PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/moonscript_PKGB
 disable_cargo_cache = true
 
 [[entry]]
+name = "nghttp2"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "nghttp2"
+only_check_SRCINFO = true
+hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
+[[entry]]
 name = "nginx_passwd"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "nginx_passwd"
