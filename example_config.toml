@@ -67,13 +67,13 @@ hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
 
-[[entry]]
-name = "gdk-pixbuf2-noglycin"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "gdk-pixbuf2-noglycin"
-only_check_SRCINFO = true
-hash_compare_PKGBUILD = true
-disable_cargo_cache = true
+#[[entry]]
+#name = "gdk-pixbuf2-noglycin"
+#repo_path = "https://github.com/archlinux/aur.git"
+#repo_branch = "gdk-pixbuf2-noglycin"
+#only_check_SRCINFO = true
+#hash_compare_PKGBUILD = true
+#disable_cargo_cache = true
 
 
 [[entry]]
@@ -148,16 +148,16 @@ only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
-[[entry]]
-name = "librsvg-noglycin"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "librsvg-noglycin"
-only_check_SRCINFO = true
-aur_deps = [
-    "gdk-pixbuf2-noglycin"
-]
-hash_compare_PKGBUILD = true
-disable_cargo_cache = false
+#[[entry]]
+#name = "librsvg-noglycin"
+#repo_path = "https://github.com/archlinux/aur.git"
+#repo_branch = "librsvg-noglycin"
+#only_check_SRCINFO = true
+#aur_deps = [
+#    "gdk-pixbuf2-noglycin"
+#]
+#hash_compare_PKGBUILD = true
+#disable_cargo_cache = false
 
 [[entry]]
 name = "libtai"
