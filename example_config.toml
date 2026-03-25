@@ -107,13 +107,13 @@ hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
 
-[[entry]]
-name = "gromit-mpx"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "gromit-mpx"
-only_check_SRCINFO = true
-hash_compare_PKGBUILD = true
-disable_cargo_cache = true
+#[[entry]]
+#name = "gromit-mpx"
+#repo_path = "https://github.com/archlinux/aur.git"
+#repo_branch = "gromit-mpx"
+#only_check_SRCINFO = true
+#hash_compare_PKGBUILD = true
+#disable_cargo_cache = true
 
 
 [[entry]]
@@ -666,13 +666,13 @@ other_deps = [
 ]
 disable_cargo_cache = true
 
-[[entry]]
-name = "offpunk-git"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "offpunk-git"
-only_check_SRCINFO = false
-hash_compare_PKGBUILD = true
-disable_cargo_cache = true
+#[[entry]]
+#name = "offpunk-git"
+#repo_path = "https://github.com/archlinux/aur.git"
+#repo_branch = "offpunk-git"
+#only_check_SRCINFO = false
+#hash_compare_PKGBUILD = true
+#disable_cargo_cache = true
 
 [[entry]]
 name = "pasystray-git"
