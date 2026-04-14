@@ -124,6 +124,24 @@ only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
+[[entry]]
+name = "libigloo"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "libigloo"
+only_check_SRCINFO = true
+hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
+[[entry]]
+name = "icecast"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "icecast"
+only_check_SRCINFO = true
+hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+aur_deps = [
+    "libigloo"
+]
 
 [[entry]]
 name = "icecat"
