@@ -1,7 +1,7 @@
 aur_repo_name = "sdcustom"
 container_name = "aurbuild"
 container_user = "aur"
-container_addr = "10.5.0.2"
+container_addr = "10.5.1.2"
 container_sshd_port = 22
 container_identity_file = "/home/stephen/.ssh/nspawn_aurbuild"
 pkgs_out_dir = "/home/stephen/Documents/aurbuild/pkgs"
@@ -387,6 +387,11 @@ repo_branch = "mingw-w64-zlib"
 only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 disable_cargo_cache = true
+aur_deps = [
+    "mingw-w64-cmake",
+    "mingw-w64-pkg-config",
+    "mingw-w64-environment"
+]
 
 [[entry]]
 name = "mingw-w64-libpng"
