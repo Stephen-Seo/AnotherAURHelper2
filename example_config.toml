@@ -509,13 +509,14 @@ only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
-[[entry]]
-name = "nginx_passwd"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "nginx_passwd"
-only_check_SRCINFO = true
-hash_compare_PKGBUILD = true
-disable_cargo_cache = true
+#[[entry]]
+#name = "nginx_passwd"
+#repo_path = "https://github.com/archlinux/aur.git"
+#repo_branch = "nginx_passwd"
+#only_check_SRCINFO = true
+#hash_compare_PKGBUILD = true
+#disable_cargo_cache = true
+# NOTE: openssl passwd can do the same thing, just prepend "USER:" to it.
 
 [[entry]]
 name = "pikaur"
