@@ -745,25 +745,31 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
     return 0
 
 
+def check_machine_status(machine_name: str) -> int:
+    """Returns 0 on running, 1 on stopped, 2 otherwise."""
+    sub_ret = subprocess.run(
+        ("/usr/bin/machinectl", "show", machine_name),
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    if sub_ret.stderr.strip().find("No machine") != -1:
+        return 1
+    elif sub_ret.stdout.strip().find("State=running") != -1:
+        return 0
+    return 2
+
+
 def stop_container(shared_state: dict) -> int:
     """Returns 0 on success."""
     container = shared_state["toml"]["container_name"]
     id_file = shared_state["toml"]["container_identity_file"]
     user = shared_state["toml"]["container_user"]
     c_addr = shared_state["toml"]["container_addr"]
-    subproc_ret = subprocess.run(
-        (
-            "/usr/bin/systemctl",
-            "is-active",
-            f"systemd-nspawn@{container}.service",
-        ),
-        check=False,
-        text=True,
-        capture_output=True,
-    )
-    if subproc_ret.stdout.strip() == "inactive":
+    machine_status = check_machine_status(container)
+    if machine_status == 1:
         return 0
-    elif subproc_ret.stdout.strip().find("active") == -1:
+    elif machine_status == 2:
         return 1
     try:
         subprocess.run(
@@ -775,7 +781,7 @@ def stop_container(shared_state: dict) -> int:
             stderr=subprocess.DEVNULL,
         )
         subprocess.run(
-            f"while systemctl is-active systemd-nspawn@{container} | grep '^active'; do sleep 0.3; done",
+            f"while ! (machinectl show {container} 2>&1 | grep 'No machine'); do sleep 0.3; done",
             check=True,
             text=True,
             shell=True,
