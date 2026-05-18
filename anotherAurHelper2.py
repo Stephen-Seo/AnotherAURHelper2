@@ -767,9 +767,21 @@ def stop_container(shared_state: dict) -> int:
     user = shared_state["toml"]["container_user"]
     c_addr = shared_state["toml"]["container_addr"]
     machine_status = check_machine_status(container)
-    if machine_status == 1:
-        return 0
-    elif machine_status == 2:
+    max_checks = 5
+    check_counter = 0
+    while check_counter < max_checks:
+        if machine_status == 0:
+            break
+        elif machine_status == 1:
+            return 0
+        else:
+            check_counter += 1
+            log_print(
+                f"WARNING: machine not stopped or running, waiting 1 second for state to change ({max_checks - check_counter} checks remaining)..."
+            )
+            time.sleep(1)
+            machine_status = check_machine_status(container)
+    if check_counter >= max_checks:
         return 1
     try:
         subprocess.run(
