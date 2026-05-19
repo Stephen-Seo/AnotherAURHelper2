@@ -781,8 +781,10 @@ def stop_container(shared_state: dict) -> int:
             )
             time.sleep(1)
             machine_status = check_machine_status(container)
-    if check_counter >= max_checks:
+    if machine_status == 2:
         return 1
+    elif machine_status == 1:
+        return 0
     try:
         subprocess.run(
             ("/usr/bin/sudo", "--stdin", "machinectl", "poweroff", container),
