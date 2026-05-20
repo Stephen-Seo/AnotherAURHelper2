@@ -477,20 +477,20 @@ only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
-[[entry]]
-name = "modrinth-app"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "modrinth-app"
-only_check_SRCINFO = true
-hash_compare_PKGBUILD = false
-
-[[entry]]
-name = "modrinth-app-bin"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "modrinth-app-bin"
-only_check_SRCINFO = true
-hash_compare_PKGBUILD = true
-disable_cargo_cache = true
+#[[entry]]
+#name = "modrinth-app"
+#repo_path = "https://github.com/archlinux/aur.git"
+#repo_branch = "modrinth-app"
+#only_check_SRCINFO = true
+#hash_compare_PKGBUILD = false
+#
+#[[entry]]
+#name = "modrinth-app-bin"
+#repo_path = "https://github.com/archlinux/aur.git"
+#repo_branch = "modrinth-app-bin"
+#only_check_SRCINFO = true
+#hash_compare_PKGBUILD = true
+#disable_cargo_cache = true
 
 [[entry]]
 name = "moonscript"
@@ -661,11 +661,11 @@ repo_branch = "glfw-git"
 hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
-[[entry]]
-name = "gnvim-git"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "gnvim-git"
-hash_compare_PKGBUILD = true
+#[[entry]]
+#name = "gnvim-git"
+#repo_path = "https://github.com/archlinux/aur.git"
+#repo_branch = "gnvim-git"
+#hash_compare_PKGBUILD = true
 
 [[entry]]
 name = "helix-git"
