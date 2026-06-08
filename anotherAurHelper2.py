@@ -359,7 +359,7 @@ def user_interact(prompt: str, opts: list[str], shared_state: dict) -> str:
         user_input = input(f"{prompt} Pick the number > ")
         try:
             user_input = int(user_input) - 1
-        except:
+        except Exception:
             continue
         if user_input >= 0 and user_input < len(opts):
             return opts[user_input]
@@ -429,7 +429,7 @@ def check_clone_package(entry: dict, shared_state: dict) -> int:
                         check=True,
                         cwd=clones_dir,
                     )
-                except:
+                except Exception:
                     log_print(
                         f'ERROR: Failed to clone "{name}" at path "{entry['repo_path']}"!'
                     )
@@ -442,7 +442,7 @@ def check_clone_package(entry: dict, shared_state: dict) -> int:
                         check=True,
                         cwd=clones_dir,
                     )
-                except:
+                except Exception:
                     log_print(
                         f'ERROR: Failed to clone "{name}" at path "{entry['repo_path']}"!'
                     )
@@ -456,7 +456,7 @@ def check_clone_package(entry: dict, shared_state: dict) -> int:
                     check=True,
                     cwd=clones_dir,
                 )
-            except:
+            except Exception:
                 log_print(f'ERROR: Failed to clone "{name}"!')
                 log_print(repr(sys.exception()))
                 return 0
@@ -473,7 +473,7 @@ def check_clone_package(entry: dict, shared_state: dict) -> int:
                 check=True,
                 cwd=clone_dir.as_posix(),
             )
-        except:
+        except Exception:
             log_print(f'ERROR: Failed to update "{name}"!')
             log_print(repr(sys.exception()))
             return 0
@@ -537,7 +537,7 @@ def check_PKGBUILD(entry: dict, shared_state: dict) -> int:
 
         if row_count != 0:
             return 0
-    except:
+    except Exception:
         log_print(f"""ERROR: Failed to check "{name}"'s PKGBUILD!""")
         log_print(repr(sys.exception()))
         return 1
@@ -738,7 +738,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         stop_ret = stop_container(shared_state)
         if stop_ret != 0:
             return 1
-    except:
+    except Exception:
         log_print(f"""ERROR: Failed to run "prepare" on "{name}"'s PKGBUILD!""")
         log_print(repr(sys.exception()))
         return 1
@@ -803,7 +803,7 @@ def stop_container(shared_state: dict) -> int:
             stderr=subprocess.DEVNULL,
             timeout=CONTAINER_WAIT_TIMEOUT,
         )
-    except:
+    except Exception:
         log_print("ERROR: Failed to stop container!")
         log_print(repr(sys.exception()))
         return 1
@@ -840,7 +840,7 @@ def start_container(shared_state: dict) -> int:
             stderr=subprocess.DEVNULL,
             timeout=CONTAINER_WAIT_TIMEOUT,
         )
-    except:
+    except Exception:
         log_print("ERROR: Failed to start container!")
         log_print(repr(sys.exception()))
         return 1
@@ -859,7 +859,7 @@ def start_container(shared_state: dict) -> int:
                 timeout=CONTAINER_SSH_WAIT_TIMEOUT,
             )
             ssh_is_ready = True
-        except:
+        except Exception:
             fail_count += 1
             if fail_count > 10:
                 log_print("ERROR: Failed to check container ssh!")
@@ -899,7 +899,7 @@ def rsync_package_to_container(entry: dict, shared_state: dict) -> int:
             check=True,
             text=True,
         )
-    except:
+    except Exception:
         log_print("ERROR: Failed to rsync to container!")
         log_print(repr(sys.exception()))
         return 1
@@ -938,7 +938,7 @@ def rsync_package_from_container(entry: dict, shared_state: dict) -> int:
             check=True,
             text=True,
         )
-    except:
+    except Exception:
         log_print("ERROR: Failed to rsync from container!")
         log_print(repr(sys.exception()))
         return 1
@@ -976,7 +976,7 @@ def rsync_cargo_home_to_container(entry: dict, shared_state: dict) -> int:
             check=True,
             text=True,
         )
-    except:
+    except Exception:
         log_print("WARNING: Failed to rsync cargo-home to CONTAINER!")
         log_print(repr(sys.exception()))
         return 1
@@ -1015,7 +1015,7 @@ def rsync_cargo_home_from_container(entry: dict, shared_state: dict) -> int:
             check=True,
             text=True,
         )
-    except:
+    except Exception:
         log_print("WARNING: Failed to rsync cargo-home from CONTAINER!")
         log_print(repr(sys.exception()))
         return 1
@@ -1049,7 +1049,7 @@ def delete_cargo_home_in_container(entry: dict, shared_state: dict) -> int:
             check=True,
             text=True,
         )
-    except:
+    except Exception:
         log_print("WARNING: Failed to remove cargo-home in CONTAINER!")
         log_print(repr(sys.exception()))
         return 1
@@ -1351,7 +1351,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         stop_ret = stop_container(shared_state)
         if stop_ret != 0:
             return 1
-    except:
+    except Exception:
         if ccache_enabled:
             rsync_dir_from_dest(
                 ccache_dir,
@@ -1414,7 +1414,7 @@ def get_pkgver(
                     line = desc_f.readline().decode().strip()
                     return ArchPkgVersion(line)
                 line = desc_f.readline()
-    except:
+    except Exception:
         log_print(f'Failed to open "{repo_path}"!')
         return None
     return None
@@ -1630,7 +1630,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
             ):
                 rsync_cargo_home_from_container(entry, shared_state)
             delete_cargo_home_in_container(entry, shared_state)
-        except:
+        except Exception:
             log_print("ERROR: Failed to verify if entry should be built!")
             log_print(repr(sys.exception()))
             return 2
@@ -1705,7 +1705,7 @@ def finalize_build(entry: dict, shared_state: dict) -> int:
                         text=True,
                         env=process_env,
                     )
-            except:
+            except Exception:
                 log_print(f"ERROR: Failed to sign pkg {pkg}!")
                 return 1
     pkgs_out_path = pathlib.PosixPath(shared_state["toml"]["pkgs_out_dir"])
@@ -1721,7 +1721,7 @@ def finalize_build(entry: dict, shared_state: dict) -> int:
             check=True,
             text=True,
         )
-    except:
+    except Exception:
         log_print(f"ERROR: Failed to add pkg {pkg}!")
         return 1
     for pkg in pkgs:
@@ -1783,13 +1783,13 @@ def finalize_build(entry: dict, shared_state: dict) -> int:
                 text=True,
                 env=process_env,
             )
-    except:
+    except Exception:
         log_print(f"ERROR: Failed to sign {repo_path.as_posix()}!")
         log_print(repr(sys.exception()))
         return 1
     try:
         repo_sig_link.symlink_to(f"{repo_name}.db.tar.sig")
-    except:
+    except Exception:
         pass
 
     return 0
@@ -1806,7 +1806,7 @@ def get_aur_deps(entry: dict, shared_state: dict) -> list[pathlib.PosixPath]:
     try:
         with tarfile.open(name=repo_path) as f:
             repo_names = f.getnames()
-    except:
+    except Exception:
         log_print(f'Failed to open "{repo_path}"!')
         return None
     aur_deps = list()
@@ -1860,7 +1860,7 @@ def rsync_file_to_dest(
             ),
             check=True,
         )
-    except:
+    except Exception:
         log_print(
             f'ERROR: Failed to rsync/send "{file.as_posix()}" -> "{dest}" file!'
         )
@@ -1890,7 +1890,7 @@ def rsync_dir_to_dest(
             ),
             check=True,
         )
-    except:
+    except Exception:
         log_print(
             f'ERROR: Failed to rsync/send "{dir_path.as_posix()}" -> "{dest}" directory!'
         )
@@ -1928,7 +1928,7 @@ def rsync_dir_from_dest(
             args,
             check=True,
         )
-    except:
+    except Exception:
         log_print(
             f'ERROR: Failed to rsync/recv "{dest}" -> "{dir_path.as_posix()}" directory!'
         )
@@ -1990,7 +1990,7 @@ def rsync_checking_gpg(shared_state: dict) -> str:
             ),
             check=True,
         )
-    except:
+    except Exception:
         log_print(
             f'ERROR: Failed to rsync/send "{dir_path.as_posix()}" -> "{dest}" directory!'
         )
@@ -2007,7 +2007,7 @@ def cleanup_packages(shared_state: dict, dry_run: bool) -> int:
     try:
         with tarfile.open(name=repo_path) as f:
             repo_names = f.getnames()
-    except:
+    except Exception:
         log_print(f'Failed to open "{repo_path}"!')
         return 1
     repo_names = set(filter(lambda n: n.find("/") == -1, repo_names))
@@ -2036,7 +2036,7 @@ def cleanup_packages(shared_state: dict, dry_run: bool) -> int:
             try:
                 pkg.unlink()
                 pathlib.PosixPath(pkg.as_posix() + ".sig").unlink()
-            except:
+            except Exception:
                 log_print(f"WARNING: Failed to remove pkg {pkg.name}!")
                 log_print(repr(sys.exception()))
 
@@ -2170,7 +2170,7 @@ def main():
             stderr=subprocess.DEVNULL,
             check=True,
         )
-    except:
+    except Exception:
         log_print("ERROR: Failed to auth with sudo!", toml=toml_d)
         log_print(repr(sys.exception()), toml=toml_d)
         return
@@ -2180,7 +2180,7 @@ def main():
             ("/usr/bin/sudo", "echo", "test echo with sudo"), check=True
         )
         subprocess.run(("/usr/bin/sudo", "-k"), check=True)
-    except:
+    except Exception:
         log_print("ERROR: Failed to check sudo auth!", toml=toml_d)
         log_print(repr(sys.exception()), toml=toml_d)
         return
@@ -2207,7 +2207,7 @@ def main():
                     text=True,
                 )
                 not_success = False
-            except:
+            except Exception:
                 log_print("ERROR: Failed to add key to ssh-agent!")
                 log_print(repr(sys.exception()))
 
@@ -2269,7 +2269,7 @@ def main():
                     env={"GNUPGHOME": toml_d["signing_gpg_dir"]},
                 )
                 not_success = False
-            except:
+            except Exception:
                 log_print("ERROR: Failed to sign test_file!")
                 log_print(repr(sys.exception()))
                 test_file_p.unlink(missing_ok=True)
@@ -2289,7 +2289,7 @@ def main():
             sqlite_conn.execute(
                 SQLITE_PKGBUILD_INIT, (toml_d["entry"][idx]["name"],)
             )
-        except:
+        except Exception:
             # Just ensure entries exist, doesn't matter if they already do.
             pass
     sqlite_conn.commit()
