@@ -7,6 +7,9 @@ Set up "80-container-host0.network" in the container's /etc/systemd/network/ dir
 
 Use forwarding options in "nftables_forwarding_allow.conf" in the host's /etc/nftables.conf file.
 
+Run "nft -cf /etc/nftables.conf" to check that the config is valid.
+Run "nft -f /etc/nftables.conf" to enable the current nftables config.
+
 Run the container once, and enable systemd-networkd with "systemctl enable systemd-networkd".
 
 Restart the container, run "systemctl daemon-reload ; systemctl restart systemd-networkd" on the host.
