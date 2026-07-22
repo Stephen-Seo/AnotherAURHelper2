@@ -66,7 +66,6 @@ only_check_SRCINFO = true
 hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
-
 #[[entry]]
 #name = "gdk-pixbuf2-noglycin"
 #repo_path = "https://github.com/archlinux/aur.git"
@@ -527,6 +526,13 @@ hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
 [[entry]]
+name = "plymouth-theme-arch-slider-and-glow"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "plymouth-theme-arch-slider-and-glow"
+hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
+[[entry]]
 name = "plzip"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "plzip"
@@ -632,13 +638,21 @@ hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
 [[entry]]
-name = "ungoogled-chromium-archlinux"
-repo_path = "https://github.com/ungoogled-software/ungoogled-chromium-archlinux.git"
-pkg_name = "ungoogled-chromium"
-hash_compare_PKGBUILD = false
-PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/ungoogled_PKGBUILD"
-ccache_dir = "/home/stephen/Documents/aurbuild/ccache/ungoogled_chromium"
-ccache_in_tmpfs = true
+name = "ungoogled-chromium-bin"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "ungoogled-chromium-bin"
+only_check_SRCINFO = true
+hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
+#[[entry]]
+#name = "ungoogled-chromium-archlinux"
+#repo_path = "https://github.com/ungoogled-software/ungoogled-chromium-archlinux.git"
+#pkg_name = "ungoogled-chromium"
+#hash_compare_PKGBUILD = false
+#PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/ungoogled_PKGBUILD"
+#ccache_dir = "/home/stephen/Documents/aurbuild/ccache/ungoogled_chromium"
+#ccache_in_tmpfs = true
 
 [[entry]]
 name = "cpufetch-git"
@@ -651,6 +665,13 @@ disable_cargo_cache = true
 name = "flamegraph-git"
 repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "flamegraph-git"
+hash_compare_PKGBUILD = true
+disable_cargo_cache = true
+
+[[entry]]
+name = "flameshot-git"
+repo_path = "https://github.com/archlinux/aur.git"
+repo_branch = "flameshot-git"
 hash_compare_PKGBUILD = true
 disable_cargo_cache = true
 
@@ -785,7 +806,7 @@ repo_path = "https://github.com/archlinux/aur.git"
 repo_branch = "t-rec-git"
 hash_compare_PKGBUILD = true
 disable_cargo_cache = false
-PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/t-rec_PKGBUILD"
+#PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/t-rec_PKGBUILD"
 
 [[entry]]
 name = "tenacity-git"
