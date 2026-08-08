@@ -157,13 +157,13 @@ repo_branch = "icecat"
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/icecat_PKGBUILD"
 hash_compare_PKGBUILD = true
 
-[[entry]]
-name = "librewolf"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "librewolf"
-only_check_SRCINFO = true
-PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/librewolf_PKGBUILD"
-hash_compare_PKGBUILD = true
+#[[entry]]
+#name = "librewolf"
+#repo_path = "https://github.com/archlinux/aur.git"
+#repo_branch = "librewolf"
+#only_check_SRCINFO = true
+#PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/librewolf_PKGBUILD"
+#hash_compare_PKGBUILD = true
 
 [[entry]]
 name = "lib32-jemalloc"
