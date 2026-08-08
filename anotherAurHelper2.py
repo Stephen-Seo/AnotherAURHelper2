@@ -573,6 +573,9 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
     ssh_port = str(shared_state["toml"]["container_sshd_port"])
     other_deps = entry["other_deps"] if "other_deps" in entry else list()
     aur_deps = get_aur_deps(entry, shared_state)
+    to_remove_pkgs = (
+        entry["force_remove_pkgs"] if "force_remove_pkgs" in entry else list()
+    )
     try:
         if start_container(shared_state) != 0:
             return 1
@@ -596,6 +599,25 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                 ),
                 check=True,
             )
+
+        remove_cmd = "/usr/bin/sudo pacman --noconfirm -Rdd"
+
+        for to_remove in to_remove_pkgs:
+            remove_cmd += " " + to_remove
+
+        subprocess.run(
+            (
+                "/usr/bin/ssh",
+                "-p",
+                ssh_port,
+                "-i",
+                id_file,
+                f"{user}@{c_addr}",
+                remove_cmd
+            ),
+            check=True,
+        )
+
         aur_dep_str = ""
         for aur_dep in aur_deps:
             dest = pathlib.PosixPath("/tmp")
@@ -1063,6 +1085,9 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
     clone_dir = clones_dir / name
     other_deps = entry["other_deps"] if "other_deps" in entry else list()
     aur_deps = get_aur_deps(entry, shared_state)
+    to_remove_pkgs = (
+        entry["force_remove_pkgs"] if "force_remove_pkgs" in entry else list()
+    )
     pkg_ver = get_pkgver(entry, shared_state)
     ssh_port = str(shared_state["toml"]["container_sshd_port"])
     ccache_enabled = False
@@ -1178,6 +1203,25 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 ),
                 check=True,
             )
+
+        remove_cmd = "/usr/bin/sudo pacman --noconfirm -Rdd"
+
+        for to_remove in to_remove_pkgs:
+            remove_cmd += " " + to_remove
+
+        subprocess.run(
+            (
+                "/usr/bin/ssh",
+                "-p",
+                ssh_port,
+                "-i",
+                id_file,
+                f"{user}@{c_addr}",
+                remove_cmd
+            ),
+            check=True,
+        )
+
         aur_dep_str = ""
         for aur_dep in aur_deps:
             dest = pathlib.PosixPath("/tmp")
@@ -1428,6 +1472,9 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
     saved_pkgver = get_pkgver(entry, shared_state)
     other_deps = entry["other_deps"] if "other_deps" in entry else list()
     aur_deps = get_aur_deps(entry, shared_state)
+    to_remove_pkgs = (
+        entry["force_remove_pkgs"] if "force_remove_pkgs" in entry else list()
+    )
     id_file = shared_state["toml"]["container_identity_file"]
     c_addr = shared_state["toml"]["container_addr"]
     ssh_port = str(shared_state["toml"]["container_sshd_port"])
@@ -1573,6 +1620,25 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                     ),
                     check=True,
                 )
+
+            remove_cmd = "/usr/bin/sudo pacman --noconfirm -Rdd"
+
+            for to_remove in to_remove_pkgs:
+                remove_cmd += " " + to_remove
+
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-p",
+                    ssh_port,
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    remove_cmd
+                ),
+                check=True,
+            )
+
             aur_dep_str = ""
             for aur_dep in aur_deps:
                 dest = pathlib.PosixPath("/tmp")
