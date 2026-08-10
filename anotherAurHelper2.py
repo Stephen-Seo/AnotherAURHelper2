@@ -595,7 +595,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"sudo pacman --noconfirm -S {other_dep_str}",
+                    f"sudo -S pacman --noconfirm -S {other_dep_str}",
                 ),
                 check=True,
             )
@@ -641,7 +641,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"sudo pacman --noconfirm -U {aur_dep_str}",
+                    f"sudo -S pacman --noconfirm -U {aur_dep_str}",
                 ),
                 check=True,
             )
@@ -1137,7 +1137,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"sudo sed -i -e '/^BUILDENV/s/!ccache/ccache/' /etc/makepkg.conf",
+                    f"sudo -S sed -i -e '/^BUILDENV/s/!ccache/ccache/' /etc/makepkg.conf",
                 ),
                 check=True,
             )
@@ -1149,7 +1149,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    "sudo pacman --noconfirm -S ccache",
+                    "sudo -S pacman --noconfirm -S ccache",
                 ),
                 check=True,
             )
@@ -1200,7 +1200,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"sudo pacman --noconfirm -S {other_dep_str}",
+                    f"sudo -S pacman --noconfirm -S {other_dep_str}",
                 ),
                 check=True,
             )
@@ -1246,7 +1246,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    f"sudo pacman --noconfirm -U {aur_dep_str}",
+                    f"sudo -S pacman --noconfirm -U {aur_dep_str}",
                 ),
                 check=True,
             )
@@ -1618,7 +1618,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                         "-i",
                         id_file,
                         f"{user}@{c_addr}",
-                        f"sudo pacman --noconfirm -S {other_dep_str}",
+                        f"sudo -S pacman --noconfirm -S {other_dep_str}",
                     ),
                     check=True,
                 )
@@ -1667,7 +1667,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                         "-i",
                         id_file,
                         f"{user}@{c_addr}",
-                        f"sudo pacman --noconfirm -U {aur_dep_str}",
+                        f"sudo -S pacman --noconfirm -U {aur_dep_str}",
                     ),
                     check=True,
                 )
