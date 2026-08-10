@@ -590,6 +590,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -608,6 +609,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         subprocess.run(
             (
                 "/usr/bin/ssh",
+                "-t",
                 "-p",
                 ssh_port,
                 "-i",
@@ -635,6 +637,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -671,6 +674,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -689,6 +693,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         subprocess.run(
             (
                 "/usr/bin/ssh",
+                "-t",
                 "-p",
                 ssh_port,
                 "-i",
@@ -704,6 +709,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
         run_ret = subprocess.run(
             (
                 "/usr/bin/ssh",
+                "-t",
                 "-p",
                 ssh_port,
                 "-i",
@@ -731,6 +737,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -1061,6 +1068,7 @@ def delete_cargo_home_in_container(entry: dict, shared_state: dict) -> int:
         subprocess.run(
             (
                 "/usr/bin/ssh",
+                "-t",
                 "-p",
                 ssh_port,
                 "-i",
@@ -1131,6 +1139,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -1143,6 +1152,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -1174,6 +1184,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -1194,6 +1205,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -1212,6 +1224,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
         subprocess.run(
             (
                 "/usr/bin/ssh",
+                "-t",
                 "-p",
                 ssh_port,
                 "-i",
@@ -1239,6 +1252,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -1259,6 +1273,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -1280,6 +1295,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -1297,6 +1313,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-t",
                         "-p",
                         ssh_port,
                         "-i",
@@ -1310,6 +1327,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 run_ret = subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-t",
                         "-p",
                         ssh_port,
                         "-i",
@@ -1325,6 +1343,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 run_ret = subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-t",
                         "-p",
                         ssh_port,
                         "-i",
@@ -1348,6 +1367,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-t",
                         "-p",
                         ssh_port,
                         "-i",
@@ -1364,6 +1384,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
             name,
             [
                 "/usr/bin/ssh",
+                "-t",
                 "-p",
                 ssh_port,
                 "-i",
@@ -1591,6 +1612,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                 subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-t",
                         "-p",
                         ssh_port,
                         "-i",
@@ -1611,6 +1633,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                 subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-t",
                         "-p",
                         ssh_port,
                         "-i",
@@ -1629,6 +1652,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
             subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
@@ -1659,6 +1683,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                 subprocess.run(
                     (
                         "/usr/bin/ssh",
+                        "-t",
                         "-p",
                         ssh_port,
                         "-i",
@@ -1676,6 +1701,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
             run_ret = subprocess.run(
                 (
                     "/usr/bin/ssh",
+                    "-t",
                     "-p",
                     ssh_port,
                     "-i",
