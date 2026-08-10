@@ -601,24 +601,25 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                 check=True,
             )
 
-        remove_cmd = "/usr/bin/sudo pacman --noconfirm -Rdd"
+        if len(to_remove_pkgs) != 0:
+            remove_cmd = "/usr/bin/sudo pacman --noconfirm -Rdd"
 
-        for to_remove in to_remove_pkgs:
-            remove_cmd += " " + to_remove
+            for to_remove in to_remove_pkgs:
+                remove_cmd += " " + to_remove
 
-        subprocess.run(
-            (
-                "/usr/bin/ssh",
-                "-t",
-                "-p",
-                ssh_port,
-                "-i",
-                id_file,
-                f"{user}@{c_addr}",
-                remove_cmd
-            ),
-            check=True,
-        )
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-t",
+                    "-p",
+                    ssh_port,
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    remove_cmd
+                ),
+                check=True,
+            )
 
         aur_dep_str = ""
         for aur_dep in aur_deps:
@@ -1216,24 +1217,25 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                 check=True,
             )
 
-        remove_cmd = "/usr/bin/sudo pacman --noconfirm -Rdd"
+        if len(to_remove_pkgs) != 0:
+            remove_cmd = "/usr/bin/sudo pacman --noconfirm -Rdd"
 
-        for to_remove in to_remove_pkgs:
-            remove_cmd += " " + to_remove
+            for to_remove in to_remove_pkgs:
+                remove_cmd += " " + to_remove
 
-        subprocess.run(
-            (
-                "/usr/bin/ssh",
-                "-t",
-                "-p",
-                ssh_port,
-                "-i",
-                id_file,
-                f"{user}@{c_addr}",
-                remove_cmd
-            ),
-            check=True,
-        )
+            subprocess.run(
+                (
+                    "/usr/bin/ssh",
+                    "-t",
+                    "-p",
+                    ssh_port,
+                    "-i",
+                    id_file,
+                    f"{user}@{c_addr}",
+                    remove_cmd
+                ),
+                check=True,
+            )
 
         aur_dep_str = ""
         for aur_dep in aur_deps:
@@ -1644,24 +1646,25 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                     check=True,
                 )
 
-            remove_cmd = "/usr/bin/sudo pacman --noconfirm -Rdd"
+            if len(to_remove_pkgs) != 0:
+                remove_cmd = "/usr/bin/sudo pacman --noconfirm -Rdd"
 
-            for to_remove in to_remove_pkgs:
-                remove_cmd += " " + to_remove
+                for to_remove in to_remove_pkgs:
+                    remove_cmd += " " + to_remove
 
-            subprocess.run(
-                (
-                    "/usr/bin/ssh",
-                    "-t",
-                    "-p",
-                    ssh_port,
-                    "-i",
-                    id_file,
-                    f"{user}@{c_addr}",
-                    remove_cmd
-                ),
-                check=True,
-            )
+                subprocess.run(
+                    (
+                        "/usr/bin/ssh",
+                        "-t",
+                        "-p",
+                        ssh_port,
+                        "-i",
+                        id_file,
+                        f"{user}@{c_addr}",
+                        remove_cmd
+                    ),
+                    check=True,
+                )
 
             aur_dep_str = ""
             for aur_dep in aur_deps:
