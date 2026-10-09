@@ -2398,7 +2398,14 @@ def main():
         log_print(
             f"Checking {entry['name']} ({idx + 1} of {len(toml_d["entry"])})..."
         )
-        if check_clone_package(entry, shared_state) == 0:
+        check_clone_package_failure = True
+        for inner_idx in range(3):
+            if check_clone_package(entry, shared_state) != 0:
+                check_clone_package_failure = False
+                break
+            else:
+                time.sleep(1)
+        if check_clone_package_failure:
             log_print(
                 f"""Skipping "{entry['name']}" due to clone/update issue..."""
             )
