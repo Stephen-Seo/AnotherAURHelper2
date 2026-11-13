@@ -695,11 +695,11 @@ repo_branch = "helix-git"
 hash_compare_PKGBUILD = true
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/helix-git_PKGBUILD"
 
-[[entry]]
-name = "ion-git"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "ion-git"
-hash_compare_PKGBUILD = true
+#[[entry]]
+#name = "ion-git"
+#repo_path = "https://github.com/archlinux/aur.git"
+#repo_branch = "ion-git"
+#hash_compare_PKGBUILD = true
 
 [[entry]]
 name = "neovide-git"
@@ -708,16 +708,17 @@ repo_branch = "neovide-git"
 hash_compare_PKGBUILD = true
 PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/neovide_PKGBUILD"
 
-[[entry]]
-name = "obs-studio-git"
-repo_path = "https://github.com/archlinux/aur.git"
-repo_branch = "obs-studio-git"
-hash_compare_PKGBUILD = true
-other_deps = [
-    "pipewire-jack",
-    "wireplumber"
-]
-disable_cargo_cache = true
+#[[entry]]
+#name = "obs-studio-git"
+#repo_path = "https://github.com/archlinux/aur.git"
+#repo_branch = "obs-studio-git"
+#hash_compare_PKGBUILD = true
+#other_deps = [
+#    "pipewire-jack",
+#    "wireplumber"
+#]
+#disable_cargo_cache = true
+#PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/obs_studio_git_PKGBUILD"
 
 #[[entry]]
 #name = "offpunk-git"
@@ -816,7 +817,7 @@ hash_compare_PKGBUILD = true
 other_deps = [
     "rapidjson"
 ]
-PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/tenacity_PKGBUILD"
+#PKGBUILD_patches_dir = "/home/stephen/Documents/aurbuild/patches/tenacity_PKGBUILD"
 disable_cargo_cache = true
 
 [[entry]]
