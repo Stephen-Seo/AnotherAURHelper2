@@ -16,6 +16,7 @@ log_file = "/home/stephen/Documents/aurbuild/log.log"
 # Affects logs in "logs_dir", not the "log_file"
 log_limit = 4294967296
 logs_dir = "/home/stephen/Documents/aurbuild/buildlogs"
+disable_timestamp_in_log_filename = true
 error_on_limit = true
 print_build_logs = true
 build_in_tmpfs = true

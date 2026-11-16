@@ -614,7 +614,7 @@ def run_prepare_only(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    remove_cmd
+                    remove_cmd,
                 ),
                 check=True,
             )
@@ -1219,7 +1219,7 @@ def build_pkg(entry: dict, shared_state: dict) -> int:
                     "-i",
                     id_file,
                     f"{user}@{c_addr}",
-                    remove_cmd
+                    remove_cmd,
                 ),
                 check=True,
             )
@@ -1637,7 +1637,7 @@ def verify_to_build(entry: dict, shared_state: dict) -> int:
                         "-i",
                         id_file,
                         f"{user}@{c_addr}",
-                        remove_cmd
+                        remove_cmd,
                     ),
                     check=True,
                 )
@@ -2128,13 +2128,16 @@ def delete_posix_path_dir(path: pathlib.PosixPath):
 def subprocess_log_output(fname: str, args: list[str], shared_state: dict):
     """Exception on error."""
     logs_dir_path = pathlib.PosixPath(shared_state["toml"]["logs_dir"])
-    nowstring = get_datetime_now()
-    with logs_dir_path.joinpath(f"{fname}_stdout_{nowstring}.log").open(
-        mode="w", encoding="utf-8"
+    if shared_state["log_filename_timestamp_disable"]:
+        nowstring = ""
+    else:
+        nowstring = "_" + get_datetime_now()
+    with logs_dir_path.joinpath(f"{fname}_stdout{nowstring}.log").open(
+        mode="a", encoding="utf-8"
     ) as log_stdout, logs_dir_path.joinpath(
-        f"{fname}_stderr_{nowstring}.log"
+        f"{fname}_stderr{nowstring}.log"
     ).open(
-        mode="w", encoding="utf-8"
+        mode="a", encoding="utf-8"
     ) as log_stderr:
         proc_handle = subprocess.Popen(
             args,
@@ -2202,6 +2205,10 @@ def main():
     shared_state["built_pkgs"] = set()
     shared_state["failed_pkgs"] = set()
     shared_state["cached_PKGBUILD_ver"] = dict()
+    shared_state["log_filename_timestamp_disable"] = (
+        "disable_timestamp_in_log_filename" in toml_d
+        and toml_d["disable_timestamp_in_log_filename"]
+    )
     global GLOBAL_TOML_D
     GLOBAL_TOML_D = toml_d
     global GLOBAL_SHARED_STATE
